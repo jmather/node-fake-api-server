@@ -1,0 +1,179 @@
+openapi: 3.0.1
+info:
+  title: Fake API
+  description: Use the Fake API to mock any remote server interface, allowing you to fully end-to-end test your code.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.0
+tags:
+  - name: Meta
+    description: Meta Actions
+
+servers:
+  - url: /
+paths:
+  /:
+    post:
+      summary: Create a new user to `record` endpoints under.
+      tags:
+        - Meta
+      operationId: register
+      parameters:
+        - in: header
+          name: X-FakeAPI-Action
+          required: true
+          schema:
+            enum:
+              - register
+      requestBody:
+        description: User Information to be stored when calling the `register` action.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserInfo'
+        required: true
+      responses:
+        201:
+          description: User Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserRegistration'
+        400:
+          description: Request payload is malformed.
+    put:
+      summary: Record a new endpoint under the user used for authentication.
+      tags:
+        - Meta
+      operationId: record
+      security:
+        - BasicAuth: []
+        - BearerAuth: []
+      parameters:
+        - in: header
+          name: X-FakeAPI-Action
+          required: true
+          schema:
+            enum:
+              - record
+      requestBody:
+        description: Endpoint to be recorded when calling the `record` action.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Endpoint'
+        required: true
+      responses:
+        201:
+          description: Endpoint Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Endpoint'
+        400:
+          description: Request payload is malformed.
+        401:
+          description: Unauthorized.
+        409:
+          description: Endpoint has already been recorded.
+components:
+  securitySchemes:
+    BasicAuth:
+      type: http
+      scheme: basic
+    BearerAuth:
+      type: http
+      scheme: bearer
+  schemas:
+    UserInfo:
+      title: User Information
+      description: Payload for the `register` action.
+      type: object
+      properties:
+        external_id:
+          type: string
+          default: ''
+      additionalProperties: false
+    UserRegistration:
+      title: User Registration Information
+      description: Response payload for the `register` action.
+      type: object
+      properties:
+        username:
+          type: string
+          format: uuid
+        password:
+          type: string
+          format: uuid
+        auth_token:
+          type: string
+          format: base64
+      required: [ username, password, auth_token ]
+      additionalProperties: false
+    Endpoint:
+      title: Endpoint
+      description: Payload for the `record` action.
+      type: object
+      properties:
+        method:
+          enum:
+            - get
+            - post
+            - put
+            - patch
+            - delete
+            - head
+            - options
+          default: get
+          type: string
+        path:
+          type: string
+          format: uri-reference
+          pattern: "^/..*"
+        headers:
+          type: object
+        query_parameters:
+          type: object
+        response_mode:
+          enum:
+            - incremental
+            - random
+          default: incremental
+          type: string
+        responses:
+          type: array
+          minItems: 1
+          items:
+            "$ref": "#/components/schemas/Response"
+      required:
+        - method
+        - path
+        - responses
+      additionalProperties: false
+    Response:
+      title: Response
+      type: object
+      properties:
+        status:
+          type: integer
+          minimum: 100
+          maximum: 600
+          default: 200
+        content:
+          type: string
+        content_type:
+          type: string
+          default: "text/plain"
+        headers:
+          type: object
+        response_delay:
+          type: integer
+          minimum: 0
+          maximum: 60000
+          default: 0
+      required:
+        - status
+        - content
+        - content_type
+      additionalProperties: false

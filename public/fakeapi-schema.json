@@ -1,12 +1,24 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$ref": "#/definitions/Endpoint",
   "definitions": {
+    "UserInfo": {
+      "title": "User Information",
+      "description": "Payload for the `register` action.",
+      "type": "object",
+      "properties": {
+        "external_id": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "additionalProperties": false
+    },
     "Endpoint": {
       "title": "Endpoint",
       "type": "object",
       "properties": {
         "method": {
+          "type": "string",
           "enum": [
             "get",
             "post",
@@ -21,7 +33,7 @@
         "path": {
           "type": "string",
           "format": "uri-reference",
-          "pattern": "^/"
+          "pattern": "^/..*"
         },
         "headers": {
           "$ref": "#/definitions/RequestHeaders"
@@ -35,6 +47,7 @@
           }
         },
         "response_mode": {
+          "type": "string",
           "enum": [
             "incremental",
             "random"
@@ -49,7 +62,8 @@
           }
         }
       },
-      "required": [ "method", "path", "responses" ]
+      "required": [ "method", "path", "responses" ],
+      "additionalProperties": false
     },
     "Response": {
       "title": "Response",

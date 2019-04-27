@@ -1,0 +1,1013 @@
+{
+	"info": {
+		"_postman_id": "d2e8ce1b-e2cb-4c0f-a158-92498ab2c7db",
+		"name": "Fake API",
+		"description": "This collection defines the API implemented by the [Fake API Server](https://github.com/jmather/node-fakeapi-server) and consumed by the [Fake API Client](https://github.com/jmather/node-fakeapi-client).",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Meta",
+			"item": [
+				{
+					"name": "Create User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "3145e24d-499d-440d-a185-3d1316351a4f",
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"if (pm.response.code === 201) {",
+									"    const creds = pm.response.json();",
+									"    pm.environment.set(\"username\", creds.username);",
+									"    pm.environment.set(\"password\", creds.password);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "X-FakeAPI-Action",
+								"value": "register",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"external_id\": \"postman\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								""
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Create User",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "X-FakeAPI-Action",
+										"value": "register",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"external_id\": \"postman\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										""
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "217"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"d9-W1BK9wKwGAsdpvN1ib8F4e2tdcY\""
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 27 Apr 2019 03:20:00 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"username\": \"7b1b5334-090b-4814-b3ed-9b8add09d8b8\",\n    \"password\": \"64acfa78-bf31-445f-8427-838bbb121dd2\",\n    \"auth_token\": \"N2IxYjUzMzQtMDkwYi00ODE0LWIzZWQtOWI4YWRkMDlkOGI4OjY0YWNmYTc4LWJmMzEtNDQ1Zi04NDI3LTgzOGJiYjEyMWRkMg==\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Register Hello World!",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "2a08722d-a3cf-431d-8335-08b572080069",
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201).or.status(419);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "X-FakeAPI-Action",
+								"value": "record",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"method\": \"get\",\n\t\"path\": \"/hello-world\",\n\t\"responses\": [\n\t\t{\n\t\t\t\"status\": 200,\n\t\t\t\"content\": \"Hello world!\",\n\t\t\t\"content_type\": \"text/plain\"\n\t\t}\n\t]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								""
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Register Hello World!",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "X-FakeAPI-Action",
+										"value": "record",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"method\": \"get\",\n\t\"path\": \"/hello-world\",\n\t\"responses\": [\n\t\t{\n\t\t\t\"status\": 200,\n\t\t\t\"content\": \"Hello world!\",\n\t\t\t\"content_type\": \"text/plain\"\n\t\t}\n\t]\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										""
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "169"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"a9-ChqBaMh7whWGNpXH30lq+rUmKDY\""
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 27 Apr 2019 02:33:55 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"method\": \"get\",\n    \"path\": \"/hello-world\",\n    \"responses\": [\n        {\n            \"status\": 200,\n            \"content\": \"Hello world!\",\n            \"content_type\": \"text/plain\",\n            \"response_delay\": 0\n        }\n    ],\n    \"response_mode\": \"incremental\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Register Delayed Hello World!",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "2a08722d-a3cf-431d-8335-08b572080069",
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201).or.status(419);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "X-FakeAPI-Action",
+								"type": "text",
+								"value": "record"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"method\": \"get\",\n\t\"path\": \"/hello-world-delayed\",\n\t\"responses\": [\n\t\t{\n\t\t\t\"status\": 200,\n\t\t\t\"content\": \"Hello world!\",\n\t\t\t\"content_type\": \"text/plain\",\n\t\t\t\"response_delay\": 3000\n\t\t}\n\t]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								""
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Register Delayed Hello World!",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "X-FakeAPI-Action",
+										"type": "text",
+										"value": "record"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"method\": \"get\",\n\t\"path\": \"/hello-world-delayed\",\n\t\"responses\": [\n\t\t{\n\t\t\t\"status\": 200,\n\t\t\t\"content\": \"Hello world!\",\n\t\t\t\"content_type\": \"text/plain\",\n\t\t\t\"response_delay\": 3000\n\t\t}\n\t]\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										""
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "180"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"b4-jj1VkHFIEO41QOrziKAbfLLEVFc\""
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 27 Apr 2019 01:03:24 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"method\": \"get\",\n    \"path\": \"/hello-world-delayed\",\n    \"responses\": [\n        {\n            \"status\": 200,\n            \"content\": \"Hello world!\",\n            \"content_type\": \"text/plain\",\n            \"response_delay\": 3000\n        }\n    ],\n    \"response_mode\": \"incremental\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Register Hello Bar!",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "2a08722d-a3cf-431d-8335-08b572080069",
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201).or.status(419);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "X-FakeAPI-Action",
+								"type": "text",
+								"value": "record"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"method\": \"get\",\n\t\"path\": \"/hello-world\",\n\t\"query_parameters\": {\n\t\t\"who\": \"bar\"\n\t},\n\t\"responses\": [\n\t\t{\n\t\t\t\"status\": 200,\n\t\t\t\"content\": \"Hello bar!\",\n\t\t\t\"content_type\": \"text/plain\"\n\t\t}\n\t]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								""
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Register Hello Bar!",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "X-FakeAPI-Action",
+										"type": "text",
+										"value": "record"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"method\": \"get\",\n\t\"path\": \"/hello-world\",\n\t\"query_parameters\": {\n\t\t\"who\": \"bar\"\n\t},\n\t\"responses\": [\n\t\t{\n\t\t\t\"status\": 200,\n\t\t\t\"content\": \"Hello bar!\",\n\t\t\t\"content_type\": \"text/plain\"\n\t\t}\n\t]\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										""
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "200"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"c8-6Q7l5sdpXnYHo7L1MvOYA2s7eQs\""
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 27 Apr 2019 02:34:11 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"method\": \"get\",\n    \"path\": \"/hello-world\",\n    \"query_parameters\": {\n        \"who\": \"bar\"\n    },\n    \"responses\": [\n        {\n            \"status\": 200,\n            \"content\": \"Hello bar!\",\n            \"content_type\": \"text/plain\",\n            \"response_delay\": 0\n        }\n    ],\n    \"response_mode\": \"incremental\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Register Hello Baz!",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "2a08722d-a3cf-431d-8335-08b572080069",
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201).or.status(419);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "X-FakeAPI-Action",
+								"type": "text",
+								"value": "record"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"method\": \"get\",\n\t\"path\": \"/hello-world\",\n\t\"query_parameters\": {\n\t\t\"whom\": \"baz\"\n\t},\n\t\"responses\": [\n\t\t{\n\t\t\t\"status\": 200,\n\t\t\t\"content\": \"Hello baz!\",\n\t\t\t\"content_type\": \"text/plain\"\n\t\t}\n\t]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								""
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Register Hello Baz!",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "X-FakeAPI-Action",
+										"type": "text",
+										"value": "record"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"method\": \"get\",\n\t\"path\": \"/hello-world\",\n\t\"query_parameters\": {\n\t\t\"whom\": \"baz\"\n\t},\n\t\"responses\": [\n\t\t{\n\t\t\t\"status\": 200,\n\t\t\t\"content\": \"Hello baz!\",\n\t\t\t\"content_type\": \"text/plain\"\n\t\t}\n\t]\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										""
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "201"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"c9-fH67gkNlkMPXWph4Fll6k1V4tkk\""
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 27 Apr 2019 00:43:07 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"method\": \"get\",\n    \"path\": \"/hello-world\",\n    \"query_parameters\": {\n        \"whom\": \"baz\"\n    },\n    \"responses\": [\n        {\n            \"status\": 200,\n            \"content\": \"Hello baz!\",\n            \"content_type\": \"text/plain\",\n            \"response_delay\": 0\n        }\n    ],\n    \"response_mode\": \"incremental\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Register Hello Incremental!",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "2a08722d-a3cf-431d-8335-08b572080069",
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201).or.status(419);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "X-FakeAPI-Action",
+								"type": "text",
+								"value": "record"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"method\": \"get\",\n\t\"path\": \"/hello-incremental\",\n\t\"responses\": [\n\t\t{\n\t\t\t\"status\": 200,\n\t\t\t\"content\": \"Hello Foo!\",\n\t\t\t\"content_type\": \"text/plain\"\n\t\t},\n\t\t{\n\t\t\t\"status\": 200,\n\t\t\t\"content\": \"Hello Bar!\",\n\t\t\t\"content_type\": \"text/plain\"\n\t\t},\n\t\t{\n\t\t\t\"status\": 200,\n\t\t\t\"content\": \"Hello Biz!\",\n\t\t\t\"content_type\": \"text/plain\"\n\t\t},\n\t\t{\n\t\t\t\"status\": 200,\n\t\t\t\"content\": \"Hello Baz!\",\n\t\t\t\"content_type\": \"text/plain\"\n\t\t},\n\t\t{\n\t\t\t\"status\": 200,\n\t\t\t\"content\": \"Hello Buzz!\",\n\t\t\t\"content_type\": \"text/plain\"\n\t\t}\n\t]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								""
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Register Hello Incremental!",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "X-FakeAPI-Action",
+										"type": "text",
+										"value": "record"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"method\": \"get\",\n\t\"path\": \"/hello-incremental\",\n\t\"responses\": [\n\t\t{\n\t\t\t\"status\": 200,\n\t\t\t\"content\": \"Hello Foo!\",\n\t\t\t\"content_type\": \"text/plain\"\n\t\t},\n\t\t{\n\t\t\t\"status\": 200,\n\t\t\t\"content\": \"Hello Bar!\",\n\t\t\t\"content_type\": \"text/plain\"\n\t\t},\n\t\t{\n\t\t\t\"status\": 200,\n\t\t\t\"content\": \"Hello Biz!\",\n\t\t\t\"content_type\": \"text/plain\"\n\t\t},\n\t\t{\n\t\t\t\"status\": 200,\n\t\t\t\"content\": \"Hello Baz!\",\n\t\t\t\"content_type\": \"text/plain\"\n\t\t},\n\t\t{\n\t\t\t\"status\": 200,\n\t\t\t\"content\": \"Hello Buzz!\",\n\t\t\t\"content_type\": \"text/plain\"\n\t\t}\n\t]\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										""
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "514"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"202-M2tRcaEz2Va036KWD5F/+DR4G8Q\""
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 27 Apr 2019 02:33:14 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"method\": \"get\",\n    \"path\": \"/hello-incremental\",\n    \"responses\": [\n        {\n            \"status\": 200,\n            \"content\": \"Hello Foo!\",\n            \"content_type\": \"text/plain\",\n            \"response_delay\": 0\n        },\n        {\n            \"status\": 200,\n            \"content\": \"Hello Bar!\",\n            \"content_type\": \"text/plain\",\n            \"response_delay\": 0\n        },\n        {\n            \"status\": 200,\n            \"content\": \"Hello Biz!\",\n            \"content_type\": \"text/plain\",\n            \"response_delay\": 0\n        },\n        {\n            \"status\": 200,\n            \"content\": \"Hello Baz!\",\n            \"content_type\": \"text/plain\",\n            \"response_delay\": 0\n        },\n        {\n            \"status\": 200,\n            \"content\": \"Hello Buzz!\",\n            \"content_type\": \"text/plain\",\n            \"response_delay\": 0\n        }\n    ],\n    \"response_mode\": \"incremental\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Register Hello Random!",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "2a08722d-a3cf-431d-8335-08b572080069",
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201).or.status(419);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "X-FakeAPI-Action",
+								"type": "text",
+								"value": "record"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"method\": \"get\",\n\t\"path\": \"/hello-random\",\n\t\"response_mode\": \"random\",\n\t\"responses\": [\n\t\t{\n\t\t\t\"status\": 200,\n\t\t\t\"content\": \"Hello Foo!\",\n\t\t\t\"content_type\": \"text/plain\"\n\t\t},\n\t\t{\n\t\t\t\"status\": 200,\n\t\t\t\"content\": \"Hello Bar!\",\n\t\t\t\"content_type\": \"text/plain\"\n\t\t},\n\t\t{\n\t\t\t\"status\": 200,\n\t\t\t\"content\": \"Hello Biz!\",\n\t\t\t\"content_type\": \"text/plain\"\n\t\t},\n\t\t{\n\t\t\t\"status\": 200,\n\t\t\t\"content\": \"Hello Baz!\",\n\t\t\t\"content_type\": \"text/plain\"\n\t\t},\n\t\t{\n\t\t\t\"status\": 200,\n\t\t\t\"content\": \"Hello Buzz!\",\n\t\t\t\"content_type\": \"text/plain\"\n\t\t}\n\t]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								""
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Register Hello Random!",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "X-FakeAPI-Action",
+										"type": "text",
+										"value": "record"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"method\": \"get\",\n\t\"path\": \"/hello-random\",\n\t\"response_mode\": \"random\",\n\t\"responses\": [\n\t\t{\n\t\t\t\"status\": 200,\n\t\t\t\"content\": \"Hello Foo!\",\n\t\t\t\"content_type\": \"text/plain\"\n\t\t},\n\t\t{\n\t\t\t\"status\": 200,\n\t\t\t\"content\": \"Hello Bar!\",\n\t\t\t\"content_type\": \"text/plain\"\n\t\t},\n\t\t{\n\t\t\t\"status\": 200,\n\t\t\t\"content\": \"Hello Biz!\",\n\t\t\t\"content_type\": \"text/plain\"\n\t\t},\n\t\t{\n\t\t\t\"status\": 200,\n\t\t\t\"content\": \"Hello Baz!\",\n\t\t\t\"content_type\": \"text/plain\"\n\t\t},\n\t\t{\n\t\t\t\"status\": 200,\n\t\t\t\"content\": \"Hello Buzz!\",\n\t\t\t\"content_type\": \"text/plain\"\n\t\t}\n\t]\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										""
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "504"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"1f8-ZVKAJU8HHs4FtyFXUqRpCsjv7rg\""
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 27 Apr 2019 02:33:20 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"method\": \"get\",\n    \"path\": \"/hello-random\",\n    \"response_mode\": \"random\",\n    \"responses\": [\n        {\n            \"status\": 200,\n            \"content\": \"Hello Foo!\",\n            \"content_type\": \"text/plain\",\n            \"response_delay\": 0\n        },\n        {\n            \"status\": 200,\n            \"content\": \"Hello Bar!\",\n            \"content_type\": \"text/plain\",\n            \"response_delay\": 0\n        },\n        {\n            \"status\": 200,\n            \"content\": \"Hello Biz!\",\n            \"content_type\": \"text/plain\",\n            \"response_delay\": 0\n        },\n        {\n            \"status\": 200,\n            \"content\": \"Hello Baz!\",\n            \"content_type\": \"text/plain\",\n            \"response_delay\": 0\n        },\n        {\n            \"status\": 200,\n            \"content\": \"Hello Buzz!\",\n            \"content_type\": \"text/plain\",\n            \"response_delay\": 0\n        }\n    ]\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Execute",
+			"item": [
+				{
+					"name": "Hello World!",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{base_url}}/hello-world",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"hello-world"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delayed Hello World!",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{base_url}}/hello-world-delayed",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"hello-world-delayed"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Hello Bar!",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{base_url}}/hello-world?who=bar",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"hello-world"
+							],
+							"query": [
+								{
+									"key": "who",
+									"value": "bar"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Hello Baz!",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{base_url}}/hello-world?whom=baz",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"hello-world"
+							],
+							"query": [
+								{
+									"key": "whom",
+									"value": "baz"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Hello Bar and Baz!",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "1cc9385b-9252-40f5-b054-cea0102505ae",
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{base_url}}/hello-world?who=bar&whom=baz",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"hello-world"
+							],
+							"query": [
+								{
+									"key": "who",
+									"value": "bar"
+								},
+								{
+									"key": "whom",
+									"value": "baz"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Hello Incremental!",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{base_url}}/hello-incremental",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"hello-incremental"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Hello Random!",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{base_url}}/hello-random",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"hello-random"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "basic",
+		"basic": [
+			{
+				"key": "password",
+				"value": "{{password}}",
+				"type": "string"
+			},
+			{
+				"key": "username",
+				"value": "{{username}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "665f30e4-7a9b-4a73-9f48-7c7235778148",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "aaf59bb7-0a2f-4e19-ade7-02f4c205793f",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}
