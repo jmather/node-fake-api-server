@@ -11,7 +11,8 @@ tags:
     description: Meta Actions
 
 servers:
-  - url: /
+  - url: https://node-fakeapi-server.herokuapp.com/
+
 paths:
   /:
     post:

@@ -6,6 +6,8 @@ Pair with the [Fake API Client](https://github.com/jmather/node-fakeapi-client) 
 
 View the [API Documentation](https://documenter.getpostman.com/view/4858910/S1LpZrgg#intro) to get a better idea of how to use the Fake API.
 
+A server instance has been set up at [https://node-fakeapi-server.herokuapp.com/](https://node-fakeapi-server.herokuapp.com/).
+
 ## Schema
 
 We have defined an [Open API Specification](/public/fakeapi.openapi.yaml) as well as a detailed [JSON Schema](/public/fakeapi-schema.json) of the request payloads.
