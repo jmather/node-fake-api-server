@@ -1,6 +1,6 @@
 {
-  "name": "fake-api-server",
-  "version": "1.0.0",
+  "name": "node-fake-api-server",
+  "version": "0.1.0",
   "private": true,
   "scripts": {
     "start": "node ./bin/www",

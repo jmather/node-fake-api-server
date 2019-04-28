@@ -2,7 +2,7 @@
 	"info": {
 		"_postman_id": "d2e8ce1b-e2cb-4c0f-a158-92498ab2c7db",
 		"name": "Fake API",
-		"description": "This collection defines the API implemented by the [Fake API Server](https://github.com/jmather/node-fakeapi-server) and consumed by the [Fake API Client](https://github.com/jmather/node-fakeapi-client).",
+		"description": "This collection defines the API implemented by the [Fake API Server](https://github.com/jmather/node-fake-api-server) and consumed by the [Fake API Client](https://github.com/jmather/node-fake-api-client).",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [

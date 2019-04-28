@@ -3,7 +3,7 @@ const ajv = new Ajv({ allErrors: true, useDefaults: true});
 
 const Endpoint = require('../models/Endpoint');
 const UserManager = require('../services/user-manager');
-const apiSchema = require('../public/fakeapi-schema');
+const apiSchema = require('../public/fake-api-schema');
 
 class Meta {
     static register(req, res) {
