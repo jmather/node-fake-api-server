@@ -52,20 +52,7 @@ class TestHelper {
             });
         });
     }
-
-    /**
-     *
-     * @param {Endpoint} endpoint
-     * @returns {Promise<FakeApiClient>}
-     */
-    static serverWithEndpoint(endpoint) {
-        return this.registeredClient().then(client => {
-            return client.record(endpoint).then(() => {
-                return client;
-            });
-        });
-    }
-
+    
     static stopServer() {
         this.server.close();
     }
