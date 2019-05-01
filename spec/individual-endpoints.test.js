@@ -78,7 +78,7 @@ function testIncrementalEndpoint(client, endpoint) {
             expect(resp.statusCode).toBe(response.status);
             expect(resp.body).toBe(response.content);
             expect(resp.headers['content-type']).toContain(response.content_type);
-            expect(runTime).toBeCloseTo(response.response_delay / 1000 || 0, 1);
+            expect(runTime).toBeCloseTo(response.delay / 1000 || 0, 1);
         });
     });
 }

@@ -90,7 +90,7 @@ async function onListening() {
 
   console.log('Listening at http://127.0.0.1:' + addr.port);
 
-  if (process.env.NGROK === "true") {
+  if (process.argv.indexOf('--public') > -1) {
     console.log('Establishing public url...');
     const url = await ngrok.connect({port: addr.port});
     console.log('Listening publicly at ' + url);

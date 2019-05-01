@@ -168,7 +168,7 @@ components:
           default: "text/plain"
         headers:
           type: object
-        response_delay:
+        delay:
           type: integer
           minimum: 0
           maximum: 60000

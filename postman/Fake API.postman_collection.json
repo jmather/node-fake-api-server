@@ -232,7 +232,7 @@
 								}
 							],
 							"cookie": [],
-							"body": "{\n    \"method\": \"get\",\n    \"path\": \"/hello-world\",\n    \"responses\": [\n        {\n            \"status\": 200,\n            \"content\": \"Hello world!\",\n            \"content_type\": \"text/plain\",\n            \"response_delay\": 0\n        }\n    ],\n    \"response_mode\": \"incremental\"\n}"
+							"body": "{\n    \"method\": \"get\",\n    \"path\": \"/hello-world\",\n    \"responses\": [\n        {\n            \"status\": 200,\n            \"content\": \"Hello world!\",\n            \"content_type\": \"text/plain\",\n            \"delay\": 0\n        }\n    ],\n    \"response_mode\": \"incremental\"\n}"
 						}
 					]
 				},
@@ -268,7 +268,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"method\": \"get\",\n\t\"path\": \"/hello-world-delayed\",\n\t\"responses\": [\n\t\t{\n\t\t\t\"status\": 200,\n\t\t\t\"content\": \"Hello world!\",\n\t\t\t\"content_type\": \"text/plain\",\n\t\t\t\"response_delay\": 3000\n\t\t}\n\t]\n}"
+							"raw": "{\n\t\"method\": \"get\",\n\t\"path\": \"/hello-world-delayed\",\n\t\"responses\": [\n\t\t{\n\t\t\t\"status\": 200,\n\t\t\t\"content\": \"Hello world!\",\n\t\t\t\"content_type\": \"text/plain\",\n\t\t\t\"delay\": 3000\n\t\t}\n\t]\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/",
@@ -299,7 +299,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n\t\"method\": \"get\",\n\t\"path\": \"/hello-world-delayed\",\n\t\"responses\": [\n\t\t{\n\t\t\t\"status\": 200,\n\t\t\t\"content\": \"Hello world!\",\n\t\t\t\"content_type\": \"text/plain\",\n\t\t\t\"response_delay\": 3000\n\t\t}\n\t]\n}"
+									"raw": "{\n\t\"method\": \"get\",\n\t\"path\": \"/hello-world-delayed\",\n\t\"responses\": [\n\t\t{\n\t\t\t\"status\": 200,\n\t\t\t\"content\": \"Hello world!\",\n\t\t\t\"content_type\": \"text/plain\",\n\t\t\t\"delay\": 3000\n\t\t}\n\t]\n}"
 								},
 								"url": {
 									"raw": "{{base_url}}/",
@@ -341,7 +341,7 @@
 								}
 							],
 							"cookie": [],
-							"body": "{\n    \"method\": \"get\",\n    \"path\": \"/hello-world-delayed\",\n    \"responses\": [\n        {\n            \"status\": 200,\n            \"content\": \"Hello world!\",\n            \"content_type\": \"text/plain\",\n            \"response_delay\": 3000\n        }\n    ],\n    \"response_mode\": \"incremental\"\n}"
+							"body": "{\n    \"method\": \"get\",\n    \"path\": \"/hello-world-delayed\",\n    \"responses\": [\n        {\n            \"status\": 200,\n            \"content\": \"Hello world!\",\n            \"content_type\": \"text/plain\",\n            \"delay\": 3000\n        }\n    ],\n    \"response_mode\": \"incremental\"\n}"
 						}
 					]
 				},
@@ -450,7 +450,7 @@
 								}
 							],
 							"cookie": [],
-							"body": "{\n    \"method\": \"get\",\n    \"path\": \"/hello-world\",\n    \"query_parameters\": {\n        \"who\": \"bar\"\n    },\n    \"responses\": [\n        {\n            \"status\": 200,\n            \"content\": \"Hello bar!\",\n            \"content_type\": \"text/plain\",\n            \"response_delay\": 0\n        }\n    ],\n    \"response_mode\": \"incremental\"\n}"
+							"body": "{\n    \"method\": \"get\",\n    \"path\": \"/hello-world\",\n    \"query_parameters\": {\n        \"who\": \"bar\"\n    },\n    \"responses\": [\n        {\n            \"status\": 200,\n            \"content\": \"Hello bar!\",\n            \"content_type\": \"text/plain\",\n            \"delay\": 0\n        }\n    ],\n    \"response_mode\": \"incremental\"\n}"
 						}
 					]
 				},
@@ -559,7 +559,7 @@
 								}
 							],
 							"cookie": [],
-							"body": "{\n    \"method\": \"get\",\n    \"path\": \"/hello-world\",\n    \"query_parameters\": {\n        \"whom\": \"baz\"\n    },\n    \"responses\": [\n        {\n            \"status\": 200,\n            \"content\": \"Hello baz!\",\n            \"content_type\": \"text/plain\",\n            \"response_delay\": 0\n        }\n    ],\n    \"response_mode\": \"incremental\"\n}"
+							"body": "{\n    \"method\": \"get\",\n    \"path\": \"/hello-world\",\n    \"query_parameters\": {\n        \"whom\": \"baz\"\n    },\n    \"responses\": [\n        {\n            \"status\": 200,\n            \"content\": \"Hello baz!\",\n            \"content_type\": \"text/plain\",\n            \"delay\": 0\n        }\n    ],\n    \"response_mode\": \"incremental\"\n}"
 						}
 					]
 				},
@@ -668,7 +668,7 @@
 								}
 							],
 							"cookie": [],
-							"body": "{\n    \"method\": \"get\",\n    \"path\": \"/hello-incremental\",\n    \"responses\": [\n        {\n            \"status\": 200,\n            \"content\": \"Hello Foo!\",\n            \"content_type\": \"text/plain\",\n            \"response_delay\": 0\n        },\n        {\n            \"status\": 200,\n            \"content\": \"Hello Bar!\",\n            \"content_type\": \"text/plain\",\n            \"response_delay\": 0\n        },\n        {\n            \"status\": 200,\n            \"content\": \"Hello Biz!\",\n            \"content_type\": \"text/plain\",\n            \"response_delay\": 0\n        },\n        {\n            \"status\": 200,\n            \"content\": \"Hello Baz!\",\n            \"content_type\": \"text/plain\",\n            \"response_delay\": 0\n        },\n        {\n            \"status\": 200,\n            \"content\": \"Hello Buzz!\",\n            \"content_type\": \"text/plain\",\n            \"response_delay\": 0\n        }\n    ],\n    \"response_mode\": \"incremental\"\n}"
+							"body": "{\n    \"method\": \"get\",\n    \"path\": \"/hello-incremental\",\n    \"responses\": [\n        {\n            \"status\": 200,\n            \"content\": \"Hello Foo!\",\n            \"content_type\": \"text/plain\",\n            \"delay\": 0\n        },\n        {\n            \"status\": 200,\n            \"content\": \"Hello Bar!\",\n            \"content_type\": \"text/plain\",\n            \"delay\": 0\n        },\n        {\n            \"status\": 200,\n            \"content\": \"Hello Biz!\",\n            \"content_type\": \"text/plain\",\n            \"delay\": 0\n        },\n        {\n            \"status\": 200,\n            \"content\": \"Hello Baz!\",\n            \"content_type\": \"text/plain\",\n            \"delay\": 0\n        },\n        {\n            \"status\": 200,\n            \"content\": \"Hello Buzz!\",\n            \"content_type\": \"text/plain\",\n            \"delay\": 0\n        }\n    ],\n    \"response_mode\": \"incremental\"\n}"
 						}
 					]
 				},
@@ -777,7 +777,7 @@
 								}
 							],
 							"cookie": [],
-							"body": "{\n    \"method\": \"get\",\n    \"path\": \"/hello-random\",\n    \"response_mode\": \"random\",\n    \"responses\": [\n        {\n            \"status\": 200,\n            \"content\": \"Hello Foo!\",\n            \"content_type\": \"text/plain\",\n            \"response_delay\": 0\n        },\n        {\n            \"status\": 200,\n            \"content\": \"Hello Bar!\",\n            \"content_type\": \"text/plain\",\n            \"response_delay\": 0\n        },\n        {\n            \"status\": 200,\n            \"content\": \"Hello Biz!\",\n            \"content_type\": \"text/plain\",\n            \"response_delay\": 0\n        },\n        {\n            \"status\": 200,\n            \"content\": \"Hello Baz!\",\n            \"content_type\": \"text/plain\",\n            \"response_delay\": 0\n        },\n        {\n            \"status\": 200,\n            \"content\": \"Hello Buzz!\",\n            \"content_type\": \"text/plain\",\n            \"response_delay\": 0\n        }\n    ]\n}"
+							"body": "{\n    \"method\": \"get\",\n    \"path\": \"/hello-random\",\n    \"response_mode\": \"random\",\n    \"responses\": [\n        {\n            \"status\": 200,\n            \"content\": \"Hello Foo!\",\n            \"content_type\": \"text/plain\",\n            \"delay\": 0\n        },\n        {\n            \"status\": 200,\n            \"content\": \"Hello Bar!\",\n            \"content_type\": \"text/plain\",\n            \"delay\": 0\n        },\n        {\n            \"status\": 200,\n            \"content\": \"Hello Biz!\",\n            \"content_type\": \"text/plain\",\n            \"delay\": 0\n        },\n        {\n            \"status\": 200,\n            \"content\": \"Hello Baz!\",\n            \"content_type\": \"text/plain\",\n            \"delay\": 0\n        },\n        {\n            \"status\": 200,\n            \"content\": \"Hello Buzz!\",\n            \"content_type\": \"text/plain\",\n            \"delay\": 0\n        }\n    ]\n}"
 						}
 					]
 				}

@@ -84,7 +84,7 @@
         "headers": {
           "$ref": "#/definitions/ResponseHeaders"
         },
-        "response_delay": {
+        "delay": {
           "type": "integer",
           "minimum": 0,
           "maximum": 60000,
