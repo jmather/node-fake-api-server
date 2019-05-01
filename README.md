@@ -1,5 +1,7 @@
 # Fake API Server
 
+[![DeepScan grade](https://deepscan.io/api/teams/2509/projects/5227/branches/40566/badge/grade.svg)](https://deepscan.io/dashboard#view=project&tid=2509&pid=5227&bid=40566)
+
 This tool allows you to register collections of arbitrary endpoints to mock responses for, allowing you to easily test your code end-to-end.
 
 Pair with the [Fake API Client](https://github.com/jmather/node-fake-api-client) for easy collection registration.

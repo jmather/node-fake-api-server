@@ -8,7 +8,7 @@ let client = null;
 beforeEach(() => {
     return helper.buildServer().then(c => {
         client = c;
-    })
+    });
 });
 
 afterEach(() => {

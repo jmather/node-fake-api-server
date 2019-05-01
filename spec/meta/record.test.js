@@ -8,7 +8,7 @@ let client = null;
 beforeEach(() => {
     return helper.registeredClient().then(c => {
         client = c;
-    })
+    });
 });
 
 afterEach(() => {
