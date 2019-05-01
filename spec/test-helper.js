@@ -28,7 +28,7 @@ class TestHelper {
                 switch (error.code) {
                     case 'EACCES':
                     case 'EADDRINUSE':
-                        return buildServer();
+                        return this.buildServer();
 
                     default:
                         reject(error);

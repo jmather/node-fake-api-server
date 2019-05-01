@@ -18,14 +18,14 @@ We have defined an [Open API Specification](/public/fake-api.openapi.yaml) as we
 
 ### Run Locally (Private)
 
-```
+```bash
 npm install -g node-fake-api-server
 fake-api-server
 ```
 
 ### Run Locally (Public)
 
-```
+```bash
 npm install -g node-fake-api-server
 fake-api-server --public
 ```

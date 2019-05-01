@@ -15,7 +15,7 @@
     "start": "node ./bin/www",
     "public": "node ./bin/www --public",
     "test": "jest",
-    "lint": "eslint lib/**/*.js spec/**/*.js"
+    "lint": "eslint \"**/*.js\""
   },
   "dependencies": {
     "ajv": "^6.10.0",
