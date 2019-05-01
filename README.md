@@ -1,5 +1,6 @@
 # Fake API Server
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/2f323f9700ab4e2eaed48f6e79355d70)](https://app.codacy.com/app/jmather/node-fake-api-server?utm_source=github.com&utm_medium=referral&utm_content=jmather/node-fake-api-server&utm_campaign=Badge_Grade_Dashboard)
 [![DeepScan grade](https://deepscan.io/api/teams/2509/projects/5227/branches/40566/badge/grade.svg)](https://deepscan.io/dashboard#view=project&tid=2509&pid=5227&bid=40566)
 
 This tool allows you to register collections of arbitrary endpoints to mock responses for, allowing you to easily test your code end-to-end.
