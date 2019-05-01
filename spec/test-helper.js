@@ -1,4 +1,4 @@
-const encodings = require('../node_modules/iconv-lite/encodings');
+require('../node_modules/iconv-lite/encodings');
 const http = require('http');
 const FakeApiClient = require('node-fake-api-client');
 
