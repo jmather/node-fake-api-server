@@ -1,6 +1,7 @@
 # Fake API Server
 
 [![Build Status](https://travis-ci.org/jmather/node-fake-api-server.svg?branch=master)](https://travis-ci.org/jmather/node-fake-api-server)
+[![Sonarcloud Status](https://sonarcloud.io/api/project_badges/measure?project=jmather_node-fake-api-server&metric=alert_status)](https://sonarcloud.io/dashboard?id=jmather_node-fake-api-server)
 [![Coverage Status](https://coveralls.io/repos/github/jmather/node-fake-api-server/badge.svg?branch=master)](https://coveralls.io/github/jmather/node-fake-api-server?branch=master)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/2f323f9700ab4e2eaed48f6e79355d70)](https://app.codacy.com/app/jmather/node-fake-api-server?utm_source=github.com&utm_medium=referral&utm_content=jmather/node-fake-api-server&utm_campaign=Badge_Grade_Dashboard)
 [![DeepScan grade](https://deepscan.io/api/teams/2509/projects/5227/branches/40566/badge/grade.svg)](https://deepscan.io/dashboard#view=project&tid=2509&pid=5227&bid=40566)
