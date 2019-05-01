@@ -17,13 +17,31 @@ We have defined an [Open API Specification](/public/fake-api.openapi.yaml) as we
 ### Run Locally (Private)
 
 ```
-npm install
-npm start
+npm install -g node-fake-api-server
+fake-api-server
 ```
 
 ### Run Locally (Public)
 
 ```
-npm install
-npm run public
+npm install -g node-fake-api-server
+fake-api-server --public
+```
+
+### Run In Code
+
+```javascript
+const http = require('http');
+const app = require('node-fake-api-server');
+
+const port = Math.floor(Math.random() * 2000) + 3000;
+
+app.set('port', port);
+
+const server = http.createServer(app);
+server.listen(port);
+
+server.on('listening', () => {
+    // do stuff...
+});
 ```
