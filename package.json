@@ -16,7 +16,7 @@
     "public": "node ./bin/www --public",
     "test": "jest",
     "lint": "eslint \"**/*.js\"",
-    "coveralls": "jest --coverage && cat ./tests/coverage/lcov.info | coveralls"
+    "coveralls": "jest --coverage && cat ./coverage/lcov.info | coveralls"
   },
   "dependencies": {
     "ajv": "^6.10.0",
