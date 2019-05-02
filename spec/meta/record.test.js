@@ -16,6 +16,20 @@ afterEach(() => {
     client = null;
 });
 
+it('rejects unauthed request', () => {
+    expect.assertions(2);
+
+    const endpoint = helper.endpoints.hello_world;
+
+    client.auth.pass = 'wrong';
+
+    return client.record(endpoint)
+        .catch(error => {
+        expect(error.statusCode).toBe(401);
+        expect(error.error).toBe('Unauthorized');
+    });
+});
+
 it('rejects a bad record request', () => {
     expect.assertions(2);
 
