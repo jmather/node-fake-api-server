@@ -100,6 +100,40 @@ const endpoints = {
             },
         ],
     },
+
+    hello_foo: {
+        method: 'get',
+        path: '/hello-world',
+        response_mode: 'incremental',
+        query_parameters: {
+            who: 'foo'
+        },
+        responses: [
+            {
+                status: 200,
+                content: 'Hello Foo!',
+                content_type: 'text/plain',
+                delay: 0,
+            },
+        ],
+    },
+
+    hello_bar: {
+        method: 'get',
+        path: '/hello-world',
+        response_mode: 'incremental',
+        query_parameters: {
+            whom: 'bar'
+        },
+        responses: [
+            {
+                status: 200,
+                content: 'Hello Bar!',
+                content_type: 'text/plain',
+                delay: 0,
+            },
+        ],
+    },
 };
 
 module.exports = endpoints;
