@@ -1,4 +1,3 @@
-const Promise = require('bluebird');
 require('any-promise/register/bluebird');
 const request = require('request-promise-any');
 

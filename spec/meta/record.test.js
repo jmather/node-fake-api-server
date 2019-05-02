@@ -23,8 +23,7 @@ it('rejects unauthed request', () => {
 
     client.auth.pass = 'wrong';
 
-    return client.record(endpoint)
-        .catch(error => {
+    return client.record(endpoint).catch(error => {
         expect(error.statusCode).toBe(401);
         expect(error.error).toBe('Unauthorized');
     });
