@@ -49,3 +49,16 @@ it('handles a good record request', () => {
         expect(endpointData).toEqual(endpoint);
     });
 });
+
+it('rejects a duplicate record request', () => {
+    expect.assertions(2);
+
+    const endpoint = helper.endpoints.hello_world;
+
+    return client.record(endpoint).then(() => {
+        return client.record(endpoint).catch((error) => {
+            expect(error.statusCode).toBe(409);
+            expect(error.error).toBe('Conflict');
+        });
+    });
+});
