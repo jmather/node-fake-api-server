@@ -15,7 +15,7 @@ install:
 - npm install
 script:
 - npm test
-- npm run coveralls
+- npx jest --coverage && cat ./coverage/lcov.info | npx coveralls
 - sonar-scanner
 addons:
   sonarcloud:

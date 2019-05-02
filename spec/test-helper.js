@@ -52,7 +52,7 @@ class TestHelper {
             });
         });
     }
-    
+
     static stopServer() {
         this.server.close();
     }
