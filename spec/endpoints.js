@@ -29,6 +29,34 @@ const endpoints = {
         ],
     },
 
+    post_hello_world: {
+        method: 'post',
+        path: '/hello-world',
+        response_mode: 'incremental',
+        responses: [
+            {
+                status: 201,
+                content: 'Hello World!',
+                content_type: 'text/plain',
+                delay: 0,
+            },
+        ],
+    },
+
+    put_hello_world: {
+        method: 'put',
+        path: '/hello-world',
+        response_mode: 'incremental',
+        responses: [
+            {
+                status: 201,
+                content: 'Hello World!',
+                content_type: 'text/plain',
+                delay: 0,
+            },
+        ],
+    },
+
     hello_incremental: {
         method: 'get',
         path: '/hello-incremental',

@@ -43,3 +43,25 @@ it('errors when it can match multiple endpoints', () => {
         });
     });
 });
+
+it('finds the right match', () => {
+    expect.assertions(2);
+    return client.record(helper.endpoints.hello_world).then(() => {
+        const endpoint = helper.endpoints.hello_bar;
+        return client.record(endpoint).then(() => {
+            const req = {
+                url: client.server + '/hello-world',
+                headers: {
+                    'x-whom': 'bar',
+                },
+                auth: client.auth,
+                resolveWithFullResponse: true,
+            };
+
+            return request(req).then(response => {
+                expect(response.statusCode).toBe(endpoint.responses[0].status);
+                expect(response.body).toBe('Hello Bar!');
+            });
+        });
+    });
+});
