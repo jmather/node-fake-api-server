@@ -28,7 +28,9 @@ it('errors when it can match multiple endpoints', () => {
                 url: client.server + '/hello-world',
                 qs: {
                     who: 'foo',
-                    whom: 'bar',
+                },
+                headers: {
+                    'x-whom': 'bar',
                 },
                 auth: client.auth,
             };

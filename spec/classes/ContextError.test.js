@@ -5,3 +5,9 @@ it('stores context correctly', () => {
     expect(err.message).toBe('thing went wrong');
     expect(err.data.foo).toBe('bar');
 });
+
+it('defines empty context if omitted', () => {
+    const err = new ContextError('thing went wrong');
+    expect(err.message).toBe('thing went wrong');
+    expect(err.data).not.toBe(undefined);
+});

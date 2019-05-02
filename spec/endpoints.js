@@ -118,17 +118,53 @@ const endpoints = {
         ],
     },
 
-    hello_bar: {
+    hello_foo_other: {
         method: 'get',
         path: '/hello-world',
         response_mode: 'incremental',
         query_parameters: {
-            whom: 'bar'
+            who: 'foo',
+            other: 'other',
+        },
+        responses: [
+            {
+                status: 200,
+                content: 'Hello Other Foo!',
+                content_type: 'text/plain',
+                delay: 0,
+            },
+        ],
+    },
+
+    hello_bar: {
+        method: 'get',
+        path: '/hello-world',
+        response_mode: 'incremental',
+        headers: {
+            'x-whom': 'bar',
         },
         responses: [
             {
                 status: 200,
                 content: 'Hello Bar!',
+                content_type: 'text/plain',
+                delay: 0,
+            },
+        ],
+    },
+
+    hello_bar_other: {
+        method: 'get',
+        path: '/hello-world',
+        response_mode: 'incremental',
+        headers: {
+            'x-whom': 'bar',
+            'x-other': 'other',
+        },
+        responses: [
+            {
+                status: 200,
+                content: 'Hello Other Bar!',
                 content_type: 'text/plain',
                 delay: 0,
             },
