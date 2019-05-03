@@ -2,55 +2,60 @@ const Promise = require('bluebird');
 require('any-promise/register/bluebird');
 const request = require('request-promise-any');
 
-const helper = require('./test-helper');
+const TestHelper = require('../test-helper');
+const helper = new TestHelper();
 
 /**
  * @type {FakeApiClient}
  */
 let client = null;
 
-beforeEach(() => {
-    return helper.registeredClient().then(c => {
-        client = c;
-    });
-});
+describe('Get Controller', () => {
+    describe('Individual Endpoints', () => {
+        beforeEach(() => {
+            return helper.registeredClient().then(c => {
+                client = c;
+            });
+        });
 
-afterEach(() => {
-    helper.stopServer();
-    client = null;
-});
+        afterEach(() => {
+            helper.stopServer();
+            client = null;
+        });
 
-for (const endpointName in helper.endpoints) {
-    if (helper.endpoints.hasOwnProperty(endpointName) === false) {
-        continue;
-    }
-
-    if (endpointName.startsWith('bad_')) {
-        continue;
-    }
-
-    // if (endpointName === 'hello_incremental')
-    testEndpoint(endpointName, helper.endpoints[endpointName]);
-}
-
-/**
- *
- * @param {string} name
- * @param {Endpoint} endpoint
- */
-function testEndpoint(name, endpoint) {
-    it('responds to the ' + name + ' endpoint correctly', () => {
-        expect.assertions(getAssertionCount(endpoint));
-
-        return client.record(endpoint).then(() => {
-            if (endpoint.response_mode === 'incremental') {
-                return testIncrementalEndpoint(client, endpoint);
+        for (const endpointName in helper.endpoints) {
+            if (helper.endpoints.hasOwnProperty(endpointName) === false) {
+                continue;
             }
 
-            return testRandomEndpoint(client, endpoint);
-        });
+            if (endpointName.startsWith('bad_')) {
+                continue;
+            }
+
+            // if (endpointName === 'hello_incremental')
+            testEndpoint(endpointName, helper.endpoints[endpointName]);
+        }
+
+        /**
+         *
+         * @param {string} name
+         * @param {Endpoint} endpoint
+         */
+        function testEndpoint(name, endpoint) {
+            it('responds to the ' + name + ' endpoint correctly', () => {
+                expect.assertions(getAssertionCount(endpoint));
+
+                return client.record(endpoint).then(() => {
+                    if (endpoint.response_mode === 'incremental') {
+                        return testIncrementalEndpoint(client, endpoint);
+                    }
+
+                    return testRandomEndpoint(client, endpoint);
+                });
+            });
+        }
     });
-}
+});
 
 /**
  * @param {Endpoint} endpoint
@@ -115,11 +120,7 @@ function doesResponseMatch(expected, actual) {
         return false;
     }
 
-    if (actual.headers['content-type'].startsWith(expected.content_type) === false) {
-        return false;
-    }
-
-    return true;
+    return actual.headers['content-type'].startsWith(expected.content_type) !== false;
 }
 
 /**

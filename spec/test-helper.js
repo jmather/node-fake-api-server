@@ -5,11 +5,15 @@ const FakeApiClient = require('node-fake-api-client');
 const app = require('../lib/app');
 
 class TestHelper {
+    constructor() {
+        this.endpoints = TestHelper.endpoints;
+    }
+
     /**
      *
      * @returns {Promise<FakeApiClient>}
      */
-    static buildServer() {
+    buildServer() {
         return new Promise((accept, reject) => {
             const port = Math.floor(Math.random() * 2000) + 3000;
 
@@ -45,7 +49,7 @@ class TestHelper {
      *
      * @returns {Promise<FakeApiClient>}
      */
-    static registeredClient() {
+    registeredClient() {
         return this.buildServer().then(client => {
             return client.register('node-fake-api-server-test').then(() => {
                 return client;
@@ -53,7 +57,7 @@ class TestHelper {
         });
     }
 
-    static stopServer() {
+    stopServer() {
         this.server.close();
     }
 }
