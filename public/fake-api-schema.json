@@ -103,7 +103,7 @@
         }
       },
       "propertyNames": {
-        "pattern": "^((?![Cc][Oo][Nn][Tt][Ee][Nn][Tt]-[Tt][Yy][Pp][Ee]))$"
+        "pattern": "^((?![Cc][Oo][Nn][Tt][Ee][Nn][Tt]-[Tt][Yy][Pp][Ee]).*)$"
       }
     },
     "RequestHeaders": {

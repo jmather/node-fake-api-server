@@ -164,6 +164,24 @@ const endpoints = {
         ],
     },
 
+    hello_foo_other2: {
+        method: 'get',
+        path: '/hello-world',
+        response_mode: 'incremental',
+        query_parameters: {
+            who: 'fizzle',
+            other: 'other',
+        },
+        responses: [
+            {
+                status: 200,
+                content: 'Hello Other Foo!',
+                content_type: 'text/plain',
+                delay: 0,
+            },
+        ],
+    },
+
     hello_bar: {
         method: 'get',
         path: '/hello-world',
@@ -213,6 +231,41 @@ const endpoints = {
                 content: 'Hello Bar!',
                 content_type: 'text/plain',
                 delay: 0,
+            },
+        ],
+    },
+
+    hello_bar_more2: {
+        method: 'get',
+        path: '/hello-world',
+        response_mode: 'incremental',
+        headers: {
+            'x-whom': 'boo',
+            'x-more': 'yes please',
+        },
+        responses: [
+            {
+                status: 200,
+                content: 'Hello Bar!',
+                content_type: 'text/plain',
+                delay: 0,
+            },
+        ],
+    },
+
+    header_response: {
+        method: 'get',
+        path: '/respond-with-headers',
+        response_mode: 'incremental',
+        responses: [
+            {
+                status: 200,
+                content: 'Now with headers!',
+                content_type: 'text/plain',
+                delay: 0,
+                headers: {
+                    'X-Foo': 'bar',
+                },
             },
         ],
     },
