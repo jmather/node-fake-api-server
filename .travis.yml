@@ -14,7 +14,6 @@ before_install:
 install:
 - npm install
 script:
-- npm test
 - npx jest --coverage && cat ./coverage/lcov.info | npx coveralls
 - PACKAGE_VERSION=$(node -p -e "require('./package.json').version") sonar-scanner -X -Dsonar.projectVersion=$PACKAGE_VERSION
 addons:
