@@ -198,6 +198,24 @@ const endpoints = {
             },
         ],
     },
+
+    hello_bar_more: {
+        method: 'get',
+        path: '/hello-world',
+        response_mode: 'incremental',
+        headers: {
+            'x-whom': 'bar',
+            'x-more': 'yes please',
+        },
+        responses: [
+            {
+                status: 200,
+                content: 'Hello Bar!',
+                content_type: 'text/plain',
+                delay: 0,
+            },
+        ],
+    },
 };
 
 module.exports = endpoints;
