@@ -11,11 +11,12 @@ class TestHelper {
 
     /**
      *
+     * @param {number} preferredPort Port to attempt to bind to first.
      * @returns {Promise<FakeApiClient>}
      */
-    buildServer() {
+    buildServer(preferredPort) {
         return new Promise((accept, reject) => {
-            const port = Math.floor(Math.random() * 2000) + 3000;
+            const port = preferredPort | Math.floor(Math.random() * 2000) + 3000;
 
             app.set('port', port);
             app.set('logging', false);
@@ -39,10 +40,12 @@ class TestHelper {
                 }
             });
 
-            this.server.listen(port);
-
-            // console.log('server created');
+            this.startListening(port);
         });
+    }
+
+    startListening(port) {
+        this.server.listen(port);
     }
 
     /**
