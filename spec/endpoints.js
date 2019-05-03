@@ -86,7 +86,7 @@ const endpoints = {
                 status: 200,
                 content: 'Hello delayed!',
                 content_type: 'text/plain',
-                delay: 3000,
+                delay: 500,
             },
         ],
     },
