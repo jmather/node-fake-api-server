@@ -7,11 +7,12 @@ const app = require('../lib/app');
 class TestHelper {
     /**
      *
+     * @param {number} preferredPort Port to attempt to bind to first.
      * @returns {Promise<FakeApiClient>}
      */
-    static buildServer() {
+    static buildServer(preferredPort) {
         return new Promise((accept, reject) => {
-            const port = Math.floor(Math.random() * 2000) + 3000;
+            const port = preferredPort | Math.floor(Math.random() * 2000) + 3000;
 
             app.set('port', port);
             app.set('logging', false);
@@ -35,10 +36,12 @@ class TestHelper {
                 }
             });
 
-            this.server.listen(port);
-
-            // console.log('server created');
+            this.startListening(port);
         });
+    }
+
+    static startListening(port) {
+        this.server.listen(port);
     }
 
     /**
