@@ -1,6 +1,6 @@
 {
   "name": "node-fake-api-server",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "homepage": "https://github.com/jmather/node-fake-api-server#readme",
   "license": "Apache-2.0",
   "main": "lib/app.js",
