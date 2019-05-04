@@ -16,7 +16,7 @@ class TestHelper {
      */
     buildServer(preferredPort) {
         return new Promise((accept, reject) => {
-            const port = preferredPort | Math.floor(Math.random() * 2000) + 3000;
+            const port = preferredPort || Math.floor(Math.random() * 2000) + 3000;
 
             app.set('port', port);
             app.set('logging', false);
@@ -29,11 +29,10 @@ class TestHelper {
             });
 
             this.server.on('error', (error) => {
-                // console.log(error);
                 switch (error.code) {
-                    case 'EACCES':
                     case 'EADDRINUSE':
-                        return this.buildServer();
+                    case 'EACCES':
+                        return this.buildServer().then(accept);
 
                     default:
                         reject(error);

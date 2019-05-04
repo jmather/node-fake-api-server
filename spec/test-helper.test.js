@@ -5,9 +5,9 @@ const helper = new TestHelper();
 describe('TestHelper', () => {
     it('rebinds when you try to connect to port 80', () => {
         expect.assertions(1);
-        return helper.buildServer(80).then((client) => {
+        return helper.buildServer(443).then((client) => {
             const uri = url.parse(client.server);
-            expect(uri.port).not.toBe(80);
+            expect(uri.port).not.toBe(443);
             helper.stopServer();
         });
     });
