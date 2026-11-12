@@ -1,0 +1,354 @@
+{
+  "id": "matching",
+  "title": "Exact path, header case, raw body, query score, and tie",
+  "standard": ["Matching"],
+  "steps": [
+    {
+      "id": "register",
+      "request": {
+        "method": "POST",
+        "path": "/",
+        "headers": {
+          "Content-Type": "application/json",
+          "X-FakeApi-Action": "register"
+        },
+        "body": "{\"external_id\":\"matching\"}"
+      },
+      "expect": {
+        "status": 201,
+        "body": {
+          "match": "json",
+          "value": {
+            "username": {"match": "uuid", "capture": "username"},
+            "password": {"match": "non_empty", "capture": "password"},
+            "auth_token": {
+              "match": "basic_token",
+              "username": "username",
+              "password": "password",
+              "capture": "auth_token"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "record-short",
+      "request": {
+        "method": "PUT",
+        "path": "/",
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Basic {{auth_token}}",
+          "X-FakeApi-Action": "record"
+        },
+        "body": "{\"method\":\"get\",\"path\":\"/hello\",\"responses\":[{\"status\":200,\"content\":\"short\",\"content_type\":\"text/plain\"}]}"
+      },
+      "expect": {"status": 201}
+    },
+    {
+      "id": "record-long",
+      "request": {
+        "method": "PUT",
+        "path": "/",
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Basic {{auth_token}}",
+          "X-FakeApi-Action": "record"
+        },
+        "body": "{\"method\":\"get\",\"path\":\"/hello-world\",\"responses\":[{\"status\":200,\"content\":\"long\",\"content_type\":\"text/plain\"}]}"
+      },
+      "expect": {"status": 201}
+    },
+    {
+      "id": "exact-short",
+      "request": {
+        "method": "GET",
+        "path": "/hello",
+        "headers": {"Authorization": "Basic {{auth_token}}"}
+      },
+      "expect": {"status": 200, "body": {"match": "exact", "value": "short"}}
+    },
+    {
+      "id": "exact-long",
+      "request": {
+        "method": "GET",
+        "path": "/hello-world",
+        "headers": {"Authorization": "Basic {{auth_token}}"}
+      },
+      "expect": {"status": 200, "body": {"match": "exact", "value": "long"}}
+    },
+    {
+      "id": "prefix-does-not-match",
+      "request": {
+        "method": "GET",
+        "path": "/hello-world-extra",
+        "headers": {"Authorization": "Basic {{auth_token}}"}
+      },
+      "expect": {"status": 404, "body": {"match": "exact", "value": "Not Found"}}
+    },
+    {
+      "id": "shorter-than-recorded-does-not-match",
+      "request": {
+        "method": "GET",
+        "path": "/hell",
+        "headers": {"Authorization": "Basic {{auth_token}}"}
+      },
+      "expect": {"status": 404, "body": {"match": "exact", "value": "Not Found"}}
+    },
+    {
+      "id": "method-must-match",
+      "request": {
+        "method": "POST",
+        "path": "/hello",
+        "headers": {"Authorization": "Basic {{auth_token}}"}
+      },
+      "expect": {"status": 404, "body": {"match": "exact", "value": "Not Found"}}
+    },
+    {
+      "id": "record-header",
+      "request": {
+        "method": "PUT",
+        "path": "/",
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Basic {{auth_token}}",
+          "X-FakeApi-Action": "record"
+        },
+        "body": "{\"method\":\"get\",\"path\":\"/cased\",\"headers\":{\"X-Whom\":\"bar\"},\"responses\":[{\"status\":200,\"content\":\"cased\",\"content_type\":\"text/plain\"}]}"
+      },
+      "expect": {"status": 201}
+    },
+    {
+      "id": "header-name-case",
+      "request": {
+        "method": "GET",
+        "path": "/cased",
+        "headers": {
+          "Authorization": "Basic {{auth_token}}",
+          "x-whom": "bar"
+        }
+      },
+      "expect": {"status": 200, "body": {"match": "exact", "value": "cased"}}
+    },
+    {
+      "id": "header-value-is-case-sensitive",
+      "request": {
+        "method": "GET",
+        "path": "/cased",
+        "headers": {
+          "Authorization": "Basic {{auth_token}}",
+          "x-whom": "Bar"
+        }
+      },
+      "expect": {"status": 404, "body": {"match": "exact", "value": "Not Found"}}
+    },
+    {
+      "id": "record-body",
+      "request": {
+        "method": "PUT",
+        "path": "/",
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Basic {{auth_token}}",
+          "X-FakeApi-Action": "record"
+        },
+        "body": "{\"method\":\"post\",\"path\":\"/match-body\",\"body\":\"Foo\",\"responses\":[{\"status\":200,\"content\":\"specific\",\"content_type\":\"text/plain\"}]}"
+      },
+      "expect": {"status": 201}
+    },
+    {
+      "id": "record-body-fallback",
+      "request": {
+        "method": "PUT",
+        "path": "/",
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Basic {{auth_token}}",
+          "X-FakeApi-Action": "record"
+        },
+        "body": "{\"method\":\"post\",\"path\":\"/match-body\",\"responses\":[{\"status\":200,\"content\":\"fallback\",\"content_type\":\"text/plain\"}]}"
+      },
+      "expect": {"status": 201}
+    },
+    {
+      "id": "body-match-wins",
+      "request": {
+        "method": "POST",
+        "path": "/match-body",
+        "headers": {"Authorization": "Basic {{auth_token}}"},
+        "body": "Foo"
+      },
+      "expect": {"status": 200, "body": {"match": "exact", "value": "specific"}}
+    },
+    {
+      "id": "omitted-body-is-not-a-constraint",
+      "request": {
+        "method": "POST",
+        "path": "/match-body",
+        "headers": {"Authorization": "Basic {{auth_token}}"},
+        "body": "Bar"
+      },
+      "expect": {"status": 200, "body": {"match": "exact", "value": "fallback"}}
+    },
+    {
+      "id": "record-plain-query-path",
+      "request": {
+        "method": "PUT",
+        "path": "/",
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Basic {{auth_token}}",
+          "X-FakeApi-Action": "record"
+        },
+        "body": "{\"method\":\"get\",\"path\":\"/q\",\"responses\":[{\"status\":200,\"content\":\"plain\",\"content_type\":\"text/plain\"}]}"
+      },
+      "expect": {"status": 201}
+    },
+    {
+      "id": "record-query",
+      "request": {
+        "method": "PUT",
+        "path": "/",
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Basic {{auth_token}}",
+          "X-FakeApi-Action": "record"
+        },
+        "body": "{\"method\":\"get\",\"path\":\"/q\",\"query_parameters\":{\"who\":\"foo\"},\"responses\":[{\"status\":200,\"content\":\"foo\",\"content_type\":\"text/plain\"}]}"
+      },
+      "expect": {"status": 201}
+    },
+    {
+      "id": "query-is-not-part-of-the-path",
+      "request": {
+        "method": "GET",
+        "path": "/q",
+        "headers": {"Authorization": "Basic {{auth_token}}"}
+      },
+      "expect": {"status": 200, "body": {"match": "exact", "value": "plain"}}
+    },
+    {
+      "id": "higher-score-wins",
+      "request": {
+        "method": "GET",
+        "path": "/q",
+        "query_raw": "who=foo&extra=1",
+        "headers": {"Authorization": "Basic {{auth_token}}"}
+      },
+      "expect": {"status": 200, "body": {"match": "exact", "value": "foo"}}
+    },
+    {
+      "id": "record-encoded-query",
+      "request": {
+        "method": "PUT",
+        "path": "/",
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Basic {{auth_token}}",
+          "X-FakeApi-Action": "record"
+        },
+        "body": "{\"method\":\"get\",\"path\":\"/enc\",\"query_parameters\":{\"pwd\":\"p@ss\"},\"responses\":[{\"status\":200,\"content\":\"decoded\",\"content_type\":\"text/plain\"}]}"
+      },
+      "expect": {"status": 201}
+    },
+    {
+      "id": "query-match-is-decoded",
+      "request": {
+        "method": "GET",
+        "path": "/enc",
+        "query_raw": "pwd=p%40ss",
+        "headers": {"Authorization": "Basic {{auth_token}}"}
+      },
+      "expect": {"status": 200, "body": {"match": "exact", "value": "decoded"}}
+    },
+    {
+      "id": "record-repeated-query",
+      "request": {
+        "method": "PUT",
+        "path": "/",
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Basic {{auth_token}}",
+          "X-FakeApi-Action": "record"
+        },
+        "body": "{\"method\":\"get\",\"path\":\"/repeat\",\"query_parameters\":{\"tag\":\"a,b\"},\"responses\":[{\"status\":200,\"content\":\"joined\",\"content_type\":\"text/plain\"}]}"
+      },
+      "expect": {"status": 201}
+    },
+    {
+      "id": "repeated-query-joins-with-comma",
+      "request": {
+        "method": "GET",
+        "path": "/repeat",
+        "query_raw": "tag=a&tag=b",
+        "headers": {"Authorization": "Basic {{auth_token}}"}
+      },
+      "expect": {"status": 200, "body": {"match": "exact", "value": "joined"}}
+    },
+    {
+      "id": "record-tie-header",
+      "request": {
+        "method": "PUT",
+        "path": "/",
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Basic {{auth_token}}",
+          "X-FakeApi-Action": "record"
+        },
+        "body": "{\"method\":\"get\",\"path\":\"/tie\",\"headers\":{\"x-a\":\"1\"},\"responses\":[{\"status\":200,\"content\":\"from-header\",\"content_type\":\"text/plain\"}]}"
+      },
+      "expect": {"status": 201}
+    },
+    {
+      "id": "record-tie-query",
+      "request": {
+        "method": "PUT",
+        "path": "/",
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Basic {{auth_token}}",
+          "X-FakeApi-Action": "record"
+        },
+        "body": "{\"method\":\"get\",\"path\":\"/tie\",\"query_parameters\":{\"q\":\"1\"},\"responses\":[{\"status\":200,\"content\":\"from-query\",\"content_type\":\"text/plain\"}]}"
+      },
+      "expect": {"status": 201}
+    },
+    {
+      "id": "tie-is-conflict",
+      "request": {
+        "method": "GET",
+        "path": "/tie",
+        "query": {"q": "1"},
+        "headers": {
+          "Authorization": "Basic {{auth_token}}",
+          "x-a": "1"
+        }
+      },
+      "expect": {
+        "status": 409,
+        "headers": [
+          {"name": "content-type", "match": "exact", "value": "text/plain; charset=utf-8"}
+        ],
+        "body": {"match": "exact", "value": "Conflict"}
+      },
+      "log": {
+        "json": {
+          "value": {
+            "timestamp": {"match": "timestamp"},
+            "level": "warn",
+            "msg": "request completed",
+            "server": "{{server}}",
+            "request_id": {"match": "uuid", "equals_header": "x-request-id"},
+            "method": "GET",
+            "path": "/tie",
+            "query": {"q": "1"},
+            "status": 409,
+            "duration_ms": {"match": "number", "minimum": 0},
+            "action": null,
+            "user": "{{username}}"
+          }
+        }
+      }
+    }
+  ]
+}

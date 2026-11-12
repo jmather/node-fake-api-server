@@ -268,7 +268,7 @@ describe('Request logging', () => {
         }).then(() => null, () => null).then(() => {
             const row = records().filter((item) => item.path === '/hooked').pop();
             expect(row.msg).toBe('hooked');
-            expect(seen).toEqual(['json', 'xml']);
+            expect(seen).toEqual(['xml', 'json']);
 
             const xml = fs.readFileSync(xmlFile, 'utf8').trim();
             const parsed = create(xml);

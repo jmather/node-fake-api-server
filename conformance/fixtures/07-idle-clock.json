@@ -1,0 +1,153 @@
+{
+  "id": "idle-clock",
+  "title": "Manual clock: exact idle boundary, refresh on success, no refresh on failure",
+  "standard": ["Auth / idle"],
+  "env": {"FAKEAPI_CLOCK": "manual"},
+  "steps": [
+    {
+      "id": "register",
+      "request": {
+        "method": "POST",
+        "path": "/",
+        "headers": {
+          "Content-Type": "application/json",
+          "X-FakeApi-Action": "register",
+          "X-FakeApi-Now": "1700000000000"
+        },
+        "body": "{\"external_id\":\"clock\"}"
+      },
+      "expect": {
+        "status": 201,
+        "body": {
+          "match": "json",
+          "value": {
+            "username": {"match": "uuid", "capture": "username"},
+            "password": {"match": "non_empty", "capture": "password"},
+            "auth_token": {
+              "match": "basic_token",
+              "username": "username",
+              "password": "password",
+              "capture": "auth_token"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "record",
+      "request": {
+        "method": "PUT",
+        "path": "/",
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Basic {{auth_token}}",
+          "X-FakeApi-Action": "record",
+          "X-FakeApi-Now": "1700000000000"
+        },
+        "body": "{\"method\":\"get\",\"path\":\"/tick\",\"responses\":[{\"status\":200,\"content\":\"ok\",\"content_type\":\"text/plain\"}]}"
+      },
+      "expect": {"status": 201}
+    },
+    {
+      "id": "exactly-two-hours-is-still-valid",
+      "request": {
+        "method": "GET",
+        "path": "/tick",
+        "headers": {
+          "Authorization": "Basic {{auth_token}}",
+          "X-FakeApi-Now": "1700007200000"
+        }
+      },
+      "expect": {"status": 200, "body": {"match": "exact", "value": "ok"}}
+    },
+    {
+      "id": "refresh-extends-the-idle-window",
+      "request": {
+        "method": "GET",
+        "path": "/tick",
+        "headers": {
+          "Authorization": "Basic {{auth_token}}",
+          "X-FakeApi-Now": "1700007200001"
+        }
+      },
+      "expect": {"status": 200, "body": {"match": "exact", "value": "ok"}}
+    },
+    {
+      "id": "second-user",
+      "request": {
+        "method": "POST",
+        "path": "/",
+        "headers": {
+          "Content-Type": "application/json",
+          "X-FakeApi-Action": "register",
+          "X-FakeApi-Now": "1800000000000"
+        },
+        "body": "{\"external_id\":\"other\"}"
+      },
+      "expect": {
+        "status": 201,
+        "body": {
+          "match": "json",
+          "value": {
+            "username": {"match": "uuid", "capture": "other_username"},
+            "password": {"match": "non_empty", "capture": "other_password"},
+            "auth_token": {
+              "match": "basic_token",
+              "username": "other_username",
+              "password": "other_password",
+              "capture": "other_token"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "failed-auth-does-not-refresh",
+      "request": {
+        "method": "GET",
+        "path": "/tick",
+        "headers": {
+          "Authorization": "Basic bm90LXZhbGlk",
+          "X-FakeApi-Now": "1800000001000"
+        }
+      },
+      "expect": {"status": 401, "body": {"match": "exact", "value": "Unauthorized"}}
+    },
+    {
+      "id": "second-user-expires",
+      "request": {
+        "method": "GET",
+        "path": "/tick",
+        "headers": {
+          "Authorization": "Basic {{other_token}}",
+          "X-FakeApi-Now": "1800007200001"
+        }
+      },
+      "expect": {"status": 401, "body": {"match": "exact", "value": "Unauthorized"}}
+    },
+    {
+      "id": "bad-clock-header",
+      "request": {
+        "method": "GET",
+        "path": "/tick",
+        "headers": {"X-FakeApi-Now": "12.5"}
+      },
+      "expect": {
+        "status": 400,
+        "body": {
+          "match": "json",
+          "value": {
+            "message": "Request payload is invalid.",
+            "errors": [
+              {
+                "keyword": "type",
+                "path": "",
+                "message": "X-FakeApi-Now must be an integer number of milliseconds."
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

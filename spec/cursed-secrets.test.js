@@ -3,7 +3,10 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 
+const { create } = require('xmlbuilder2');
+
 const app = require('../lib/app');
+const logging = require('../lib/logging');
 const request = require('./request');
 const TestHelper = require('./helper');
 const corpus = require('./fixtures/cursed-secrets.json');
@@ -12,13 +15,12 @@ const helper = new TestHelper();
 const enabled = process.env.FAKEAPI_CURSED === '1';
 const strictSecretish = process.env.FAKEAPI_CURSED_STRICT === '1';
 
-/**
- * Placeholder hook. A real redactor replaces this. With this identity
- * function the corpus is expected to fail, which is why the test stays
- * skipped unless FAKEAPI_CURSED=1.
- */
-function placeholderHook(serialized) {
+function identityString(serialized) {
     return serialized;
+}
+
+function identityRecord(record) {
+    return record;
 }
 
 function materialize(entry) {
@@ -126,88 +128,170 @@ function contentType(entry) {
     return 'text/plain';
 }
 
+function collectJson(value, found) {
+    if (typeof value === 'string') {
+        found.push(value);
+        return;
+    }
+
+    if (Array.isArray(value)) {
+        value.forEach((item) => collectJson(item, found));
+        return;
+    }
+
+    if (value && typeof value === 'object') {
+        Object.keys(value).forEach((key) => {
+            found.push(key);
+            collectJson(value[key], found);
+        });
+    }
+}
+
+function collectXml(xml, found) {
+    const text = xml.startsWith('[xml]') ? xml.slice('[xml]'.length) : xml;
+    const root = create(text).root().node;
+
+    const walk = (node) => {
+        if (node.attributes) {
+            for (const attr of node.attributes) {
+                found.push(attr.name);
+                found.push(attr.value);
+            }
+        }
+
+        for (const child of node.childNodes || []) {
+            if (child.nodeType === 3 && child.nodeValue) {
+                found.push(child.nodeValue);
+            }
+
+            if (child.nodeType === 1) {
+                walk(child);
+            }
+        }
+    };
+
+    walk(root);
+}
+
+function decodedValues(lines, xmlFile) {
+    const found = [];
+
+    lines.forEach((line) => {
+        const text = line.trim().startsWith('[json]') ? line.trim().slice('[json]'.length) : line;
+        collectJson(JSON.parse(text), found);
+    });
+
+    if (fs.existsSync(xmlFile)) {
+        fs.readFileSync(xmlFile, 'utf8').split('\n').filter((line) => line.length > 0).forEach((line) => {
+            collectXml(line, found);
+        });
+    }
+
+    return found;
+}
+
 describe('Cursed secrets corpus', () => {
-    it('does not write assembled corpus values into JSON or XML logs', {
-        skip: enabled ? false : 'set FAKEAPI_CURSED=1 to run; the placeholder hook is expected to fail',
+    it('searches decoded log values in string, object, and both hook modes', {
+        skip: enabled ? false : 'set FAKEAPI_CURSED=1 to run; identity hooks are expected to fail',
         timeout: 60000,
     }, () => {
-        const lines = [];
-        const xmlFile = path.join(os.tmpdir(), 'fakeapi-cursed-' + process.pid + '.xml');
-        fs.rmSync(xmlFile, { force: true });
-        process.env.FAKEAPI_LOG_CAPTURE = 'all';
-        process.env.FAKEAPI_LOG_XML_PATH = xmlFile;
-        app.set('jsonLogWriter', (line) => {
-            lines.push(line);
-        });
-        app.setRedactionHook(placeholderHook);
-
-        let client = null;
-
+        const installed = logging.configuredHooks();
         const prepared = corpus.entries.map((entry) => {
             return {
                 entry,
                 value: materialize(entry),
             };
         });
+        const modes = [
+            { name: 'string', string: installed.string, object: identityRecord },
+            { name: 'object', string: identityString, object: installed.object },
+            { name: 'both', string: installed.string, object: installed.object },
+        ];
+        const missed = {};
 
-        return helper.buildServer().then((created) => {
-            client = created;
-            app.set('logging', true);
-            return client.register('cursed');
-        }).then(() => {
-            return prepared.reduce((chain, item) => {
-                return chain.then(() => sendEntry(client, item.entry, item.value));
-            }, Promise.resolve());
-        }).then(() => {
-            const blob = lines.join('\n') + '\n' + fs.readFileSync(xmlFile, 'utf8');
-            const missed = {
-                definitely: [],
-                likely: [],
-                'secret-ish': [],
-            };
+        return modes.reduce((chain, mode) => {
+            return chain.then(() => runMode(mode, prepared).then((modeMissed) => {
+                missed[mode.name] = modeMissed;
+                console.log(mode.name + ' definitely: ' + modeMissed.definitely.join(', '));
+                console.log(mode.name + ' likely: ' + modeMissed.likely.join(', '));
+                console.log(mode.name + ' secret-ish: ' + modeMissed['secret-ish'].join(', '));
+            }));
+        }, Promise.resolve()).then(() => {
+            const hard = [];
 
-            prepared.forEach((item) => {
-                const entry = item.entry;
-                const value = item.value;
+            modes.forEach((mode) => {
+                missed[mode.name].definitely.forEach((id) => hard.push(mode.name + ':definitely:' + id));
+                missed[mode.name].likely.forEach((id) => hard.push(mode.name + ':likely:' + id));
 
-                if (value === '') {
-                    return;
-                }
-
-                if (blob.includes(value)) {
-                    missed[entry.sensitivity].push(entry.id);
+                if (strictSecretish) {
+                    missed[mode.name]['secret-ish'].forEach((id) => hard.push(mode.name + ':secret-ish:' + id));
                 }
             });
 
-            const hard = missed.definitely.concat(missed.likely);
-
-            if (missed['secret-ish'].length > 0) {
-                console.log('secret-ish still present: ' + missed['secret-ish'].join(', '));
-            }
-
-            if (strictSecretish && missed['secret-ish'].length > 0) {
-                hard.push.apply(hard, missed['secret-ish']);
-            }
-
             expect(hard).toEqual([]);
-        }).finally(() => {
-            app.set('logging', false);
-            app.set('jsonLogWriter', null);
-            app.setRedactionHook((serialized) => serialized);
-            delete process.env.FAKEAPI_LOG_CAPTURE;
-            delete process.env.FAKEAPI_LOG_XML_PATH;
-            fs.rmSync(xmlFile, { force: true });
-            if (client) {
-                helper.stopServer();
-            }
         });
     });
 });
 
-function sendEntry(client, entry, value) {
+function runMode(mode, prepared) {
+    const lines = [];
+    const xmlFile = path.join(os.tmpdir(), 'fakeapi-cursed-' + process.pid + '-' + mode.name + '.xml');
+    fs.rmSync(xmlFile, { force: true });
+    process.env.FAKEAPI_LOG_CAPTURE = 'all';
+    process.env.FAKEAPI_LOG_XML_PATH = xmlFile;
+    app.set('jsonLogWriter', (line) => {
+        lines.push(line);
+    });
+    app.setRedactionHook(mode.string);
+    app.setRecordHook(mode.object);
+
+    let client = null;
+
+    return helper.buildServer().then((created) => {
+        client = created;
+        app.set('logging', true);
+        return client.register('cursed-' + mode.name);
+    }).then(() => {
+        return prepared.reduce((chain, item) => {
+            return chain.then(() => sendEntry(client, item.entry, item.value, mode.name));
+        }, Promise.resolve());
+    }).then(() => {
+        const found = decodedValues(lines, xmlFile);
+        const modeMissed = {
+            definitely: [],
+            likely: [],
+            'secret-ish': [],
+        };
+
+        prepared.forEach((item) => {
+            if (item.value === '') {
+                return;
+            }
+
+            if (found.some((text) => String(text).includes(item.value))) {
+                modeMissed[item.entry.sensitivity].push(item.entry.id);
+            }
+        });
+
+        return modeMissed;
+    }).finally(() => {
+        app.set('logging', false);
+        app.set('jsonLogWriter', null);
+        app.setRedactionHook(identityString);
+        app.setRecordHook(identityRecord);
+        delete process.env.FAKEAPI_LOG_CAPTURE;
+        delete process.env.FAKEAPI_LOG_XML_PATH;
+        fs.rmSync(xmlFile, { force: true });
+        if (client) {
+            helper.stopServer();
+        }
+    });
+}
+
+function sendEntry(client, entry, value, mode) {
     const endpoint = {
         method: needsRequestBody(entry) ? 'post' : 'get',
-        path: '/c/' + entry.id,
+        path: '/c/' + mode + '/' + entry.id,
         responses: [
             {
                 status: 200,

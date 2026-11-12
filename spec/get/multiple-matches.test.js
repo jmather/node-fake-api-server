@@ -37,9 +37,8 @@ describe('Get Controller', () => {
                     };
 
                     return request(req).catch(error => {
-                        expect(error.statusCode).toBe(400);
-                        const body = JSON.parse(error.error);
-                        expect(body.errors[0].message).toBe('Multiple possible matches');
+                        expect(error.statusCode).toBe(409);
+                        expect(error.error).toBe('Conflict');
                     });
                 });
             });

@@ -70,7 +70,7 @@ describe('Meta Controller', () => {
 
             return request(registerRequest).catch(error => {
                 expect(error.statusCode).toBe(400);
-                expect(error.error.message).toBe('data should NOT have additional properties');
+                expect(error.error.message).toBe('Request payload is invalid.');
             });
         });
     });

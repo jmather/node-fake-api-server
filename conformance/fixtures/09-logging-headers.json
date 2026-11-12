@@ -1,0 +1,99 @@
+{
+  "id": "logging-headers",
+  "title": "Capture headers omits bodies; capture none is the default field set",
+  "standard": ["Logging"],
+  "env": {"FAKEAPI_LOG_CAPTURE": "headers"},
+  "steps": [
+    {
+      "id": "register",
+      "request": {
+        "method": "POST",
+        "path": "/",
+        "headers": {
+          "Content-Type": "application/json",
+          "X-FakeApi-Action": "register"
+        },
+        "body": "{\"external_id\":\"headers\"}"
+      },
+      "expect": {
+        "status": 201,
+        "body": {
+          "match": "json",
+          "value": {
+            "username": {"match": "uuid", "capture": "username"},
+            "password": {"match": "uuid", "capture": "password"},
+            "auth_token": {
+              "match": "basic_token",
+              "username": "username",
+              "password": "password",
+              "capture": "auth_token"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "record",
+      "request": {
+        "method": "PUT",
+        "path": "/",
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Basic {{auth_token}}",
+          "X-FakeApi-Action": "record"
+        },
+        "body": "{\"method\":\"post\",\"path\":\"/hdrlog\",\"responses\":[{\"status\":200,\"content\":\"secret-body\",\"content_type\":\"text/plain\"}]}"
+      },
+      "expect": {"status": 201}
+    },
+    {
+      "id": "headers-without-bodies",
+      "request": {
+        "method": "POST",
+        "path": "/hdrlog",
+        "headers": {
+          "Authorization": "Basic {{auth_token}}",
+          "Content-Type": "text/plain",
+          "X-Trace": "abc"
+        },
+        "body": "not-logged"
+      },
+      "expect": {"status": 200, "body": {"match": "exact", "value": "secret-body"}},
+      "log": {
+        "raw_excludes": ["not-logged", "secret-body", "{{password}}"],
+        "json": {
+          "value": {
+            "timestamp": {"match": "timestamp"},
+            "level": "info",
+            "msg": "request completed",
+            "server": "{{server}}",
+            "request_id": {"match": "uuid", "equals_header": "x-request-id"},
+            "method": "POST",
+            "path": "/hdrlog",
+            "query": {},
+            "status": 200,
+            "duration_ms": {"match": "number", "minimum": 0},
+            "action": null,
+            "user": "{{username}}",
+            "request": {
+              "match": "object",
+              "absent": ["body"],
+              "keys": {
+                "content_type": "text/plain",
+                "headers": {
+                  "match": "object",
+                  "keys": {"x-trace": "abc"}
+                }
+              }
+            },
+            "response": {
+              "match": "object",
+              "absent": ["body"],
+              "keys": {"content_type": "text/plain"}
+            }
+          }
+        }
+      }
+    }
+  ]
+}

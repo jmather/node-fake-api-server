@@ -1,0 +1,126 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "UserInfo": {
+      "title": "User Information",
+      "description": "Payload for the `register` action.",
+      "type": "object",
+      "properties": {
+        "external_id": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "additionalProperties": false
+    },
+    "Endpoint": {
+      "title": "Endpoint",
+      "type": "object",
+      "properties": {
+        "method": {
+          "type": "string",
+          "enum": [
+            "get",
+            "post",
+            "put",
+            "patch",
+            "delete",
+            "head",
+            "options"
+          ],
+          "default": "get"
+        },
+        "path": {
+          "type": "string",
+          "format": "uri-reference",
+          "pattern": "^/..*"
+        },
+        "body": {
+          "type": "string"
+        },
+        "headers": {
+          "$ref": "#/definitions/RequestHeaders"
+        },
+        "query_parameters": {
+          "type": "object",
+          "patternProperties": {
+            ".*": {
+              "type": "string"
+            }
+          }
+        },
+        "response_mode": {
+          "type": "string",
+          "enum": [
+            "incremental",
+            "random"
+          ],
+          "default": "incremental"
+        },
+        "responses": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/definitions/Response"
+          }
+        }
+      },
+      "required": [ "method", "path", "responses" ],
+      "additionalProperties": false
+    },
+    "Response": {
+      "title": "Response",
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "integer",
+          "minimum": 100,
+          "maximum": 600,
+          "default": 200
+        },
+        "content": {
+          "type": "string"
+        },
+        "content_type": {
+          "type": "string"
+        },
+        "headers": {
+          "$ref": "#/definitions/ResponseHeaders"
+        },
+        "delay": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 60000,
+          "default": 0
+        }
+      },
+      "required": [ "status", "content", "content_type" ],
+      "additionalProperties": false
+    },
+    "ResponseHeaders": {
+      "title": "Response Headers",
+      "type": "object",
+      "patternProperties": {
+        ".*": {
+          "type": "string"
+        }
+      },
+      "propertyNames": {
+        "pattern": "^((?![Cc][Oo][Nn][Tt][Ee][Nn][Tt]-[Tt][Yy][Pp][Ee]).*)$"
+      }
+    },
+    "RequestHeaders": {
+      "title": "Request Headers",
+      "description": "Headers that we will look for when matching a request.",
+      "type": "object",
+      "patternProperties": {
+        ".*": {
+          "type": "string"
+        }
+      },
+      "propertyNames": {
+        "pattern": "^((?![Xx]-[Ff][Aa][Kk][Ee][Aa][Pp][Ii]-).)"
+      }
+    }
+  }
+}
