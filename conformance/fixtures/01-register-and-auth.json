@@ -1,0 +1,250 @@
+{
+  "id": "register-and-auth",
+  "title": "Register credentials, 401 text, bearer playback, and per-user isolation",
+  "standard": ["Auth", "Errors", "Logging record shape"],
+  "steps": [
+    {
+      "id": "register",
+      "request": {
+        "method": "POST",
+        "path": "/",
+        "headers": {
+          "Content-Type": "application/json",
+          "X-FakeApi-Action": "ReGiStEr"
+        },
+        "body": "{\"external_id\":\"demo\"}"
+      },
+      "expect": {
+        "status": 201,
+        "headers": [
+          {"name": "content-type", "match": "exact", "value": "application/json; charset=utf-8"},
+          {"name": "location", "match": "request_url"},
+          {"name": "x-request-id", "match": "uuid"},
+          {"name": "www-authenticate", "match": "absent"}
+        ],
+        "body": {
+          "match": "json",
+          "value": {
+            "username": {"match": "uuid", "capture": "username"},
+            "password": {"match": "uuid", "capture": "password"},
+            "auth_token": {
+              "match": "basic_token",
+              "username": "username",
+              "password": "password",
+              "capture": "auth_token"
+            }
+          }
+        }
+      },
+      "log": {
+        "raw_excludes": ["{{password}}"],
+        "json": {
+          "value": {
+            "timestamp": {"match": "timestamp"},
+            "level": "info",
+            "msg": "request completed",
+            "server": "{{server}}",
+            "request_id": {"match": "uuid", "equals_header": "x-request-id"},
+            "method": "POST",
+            "path": "/",
+            "query": {},
+            "status": 201,
+            "duration_ms": {"match": "number", "minimum": 0},
+            "action": "ReGiStEr",
+            "user": null
+          }
+        }
+      }
+    },
+    {
+      "id": "register-defaults-empty-object",
+      "request": {
+        "method": "POST",
+        "path": "/",
+        "headers": {
+          "Content-Type": "application/json",
+          "X-FakeApi-Action": "register"
+        },
+        "body": "{}"
+      },
+      "expect": {
+        "status": 201,
+        "body": {
+          "match": "json",
+          "value": {
+            "username": {"match": "uuid", "capture": "other_username"},
+            "password": {"match": "uuid", "capture": "other_password"},
+            "auth_token": {
+              "match": "basic_token",
+              "username": "other_username",
+              "password": "other_password",
+              "capture": "other_token"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "playback-without-credentials",
+      "request": {"method": "GET", "path": "/hello-world"},
+      "expect": {
+        "status": 401,
+        "headers": [
+          {"name": "content-type", "match": "exact", "value": "text/plain; charset=utf-8"},
+          {"name": "www-authenticate", "match": "exact", "value": "Basic realm=\"FakeAPI\""}
+        ],
+        "body": {"match": "exact", "value": "Unauthorized"}
+      }
+    },
+    {
+      "id": "record-without-credentials",
+      "request": {
+        "method": "PUT",
+        "path": "/",
+        "headers": {
+          "Content-Type": "application/json",
+          "X-FakeApi-Action": "record"
+        },
+        "body": "{\"method\":\"get\",\"path\":\"/hello-world\",\"responses\":[{\"status\":200,\"content\":\"Hello\",\"content_type\":\"text/plain\"}]}"
+      },
+      "expect": {
+        "status": 401,
+        "body": {"match": "exact", "value": "Unauthorized"}
+      }
+    },
+    {
+      "id": "record-bad-password",
+      "request": {
+        "method": "PUT",
+        "path": "/",
+        "headers": {
+          "Content-Type": "application/json",
+          "X-FakeApi-Action": "record",
+          "Authorization": "Basic bm9wZTpub3Bl"
+        },
+        "body": "{\"method\":\"get\",\"path\":\"/hello-world\",\"responses\":[{\"status\":200,\"content\":\"Hello\",\"content_type\":\"text/plain\"}]}"
+      },
+      "expect": {
+        "status": 401,
+        "headers": [
+          {"name": "www-authenticate", "match": "exact", "value": "Basic realm=\"FakeAPI\""}
+        ],
+        "body": {"match": "exact", "value": "Unauthorized"}
+      }
+    },
+    {
+      "id": "record-hello",
+      "request": {
+        "method": "PUT",
+        "path": "/",
+        "headers": {
+          "Content-Type": "application/json",
+          "X-FakeApi-Action": "record",
+          "Authorization": "Basic {{auth_token}}"
+        },
+        "body": "{\"method\":\"get\",\"path\":\"/hello-world\",\"responses\":[{\"status\":200,\"content\":\"Hello World!\",\"content_type\":\"text/plain\"}]}"
+      },
+      "expect": {
+        "status": 201,
+        "headers": [
+          {"name": "content-type", "match": "exact", "value": "application/json; charset=utf-8"},
+          {"name": "location", "match": "request_url"}
+        ],
+        "body": {
+          "match": "json",
+          "value": {
+            "method": "get",
+            "path": "/hello-world",
+            "response_mode": "incremental",
+            "responses": [
+              {
+                "status": 200,
+                "content": "Hello World!",
+                "content_type": "text/plain",
+                "delay": 0
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "bearer-playback",
+      "request": {
+        "method": "GET",
+        "path": "/hello-world",
+        "headers": {"Authorization": "Bearer {{auth_token}}"}
+      },
+      "expect": {
+        "status": 200,
+        "headers": [
+          {"name": "content-type", "match": "exact", "value": "text/plain"}
+        ],
+        "body": {"match": "exact", "value": "Hello World!"}
+      },
+      "log": {
+        "json": {
+          "value": {
+            "timestamp": {"match": "timestamp"},
+            "level": "info",
+            "msg": "request completed",
+            "server": "{{server}}",
+            "request_id": {"match": "uuid", "equals_header": "x-request-id"},
+            "method": "GET",
+            "path": "/hello-world",
+            "query": {},
+            "status": 200,
+            "duration_ms": {"match": "number", "minimum": 0},
+            "action": null,
+            "user": null
+          }
+        }
+      }
+    },
+    {
+      "id": "basic-miss-is-not-found",
+      "request": {
+        "method": "GET",
+        "path": "/missing",
+        "headers": {"Authorization": "Basic {{auth_token}}"}
+      },
+      "expect": {
+        "status": 404,
+        "headers": [
+          {"name": "content-type", "match": "exact", "value": "text/plain; charset=utf-8"}
+        ],
+        "body": {"match": "exact", "value": "Not Found"}
+      },
+      "log": {
+        "json": {
+          "value": {
+            "timestamp": {"match": "timestamp"},
+            "level": "warn",
+            "msg": "request completed",
+            "server": "{{server}}",
+            "request_id": {"match": "uuid", "equals_header": "x-request-id"},
+            "method": "GET",
+            "path": "/missing",
+            "query": {},
+            "status": 404,
+            "duration_ms": {"match": "number", "minimum": 0},
+            "action": null,
+            "user": "{{username}}"
+          }
+        }
+      }
+    },
+    {
+      "id": "other-user-cannot-see-the-recording",
+      "request": {
+        "method": "GET",
+        "path": "/hello-world",
+        "headers": {"Authorization": "Basic {{other_token}}"}
+      },
+      "expect": {
+        "status": 404,
+        "body": {"match": "exact", "value": "Not Found"}
+      }
+    }
+  ]
+}

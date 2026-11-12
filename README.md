@@ -75,7 +75,7 @@ Use the `username` and `password` from the register response in the later comman
 
 ## Logging and redaction hook
 
-Every completed request writes one JSON line to stdout through [pino-http](https://github.com/pinojs/pino-http). The line uses the shared field names, in this order: `timestamp`, `level`, `msg`, `server`, `request_id`, `method`, `path`, `query`, `status`, `duration_ms`, `action`, `user`. `server` is `"node"`. `level` is `info`, `warn` for 4xx, and `error` for 5xx. The response header `X-Request-Id` is the same value as `request_id`.
+Every completed request writes one JSON line to stdout. The line uses the shared field names, in this order: `timestamp`, `level`, `msg`, `server`, `request_id`, `method`, `path`, `query`, `status`, `duration_ms`, `action`, `user`. `server` is `"node"`. `level` is `info`, `warn` for 4xx, and `error` for 5xx. The response header `X-Request-Id` is the same value as `request_id`.
 
 Headers and bodies stay out of the log unless capture is turned on. With nothing set, the line has the fields above and nothing secret from the request or response bodies.
 
@@ -87,20 +87,25 @@ Headers and bodies stay out of the log unless capture is turned on. With nothing
 
 `FAKEAPI_LOG_XML_PATH`, when set, also appends the same record to that file as one `<request-log>` element per line. Leave it unset and the XML sink stays off.
 
-Redaction runs on the serialized string, after pino or the XML writer has produced it and before that string is written:
+Two hooks run for every record. `app.setRecordHook` receives the object before it is serialized (`redact_record`). `app.setRedactionHook` receives the serialized string and a format, `"json"` or `"xml"`, after that. Both default to identity. A thrown object hook skips both sinks. A thrown string hook skips that sink. The HTTP response still succeeds.
 
 ```javascript
 const app = require('node-fake-api-server');
 
+app.setRecordHook((record) => record);
+
 app.setRedactionHook((serialized, format) => {
-    // format is "json" or "xml"
     return myRedactor.redact(serialized, format);
 });
 ```
 
-The default hook returns the string unchanged. `app.set('logging', false)` turns the request log off, which is what the test suite does.
+`FAKEAPI_LOG_RECORD_HOOK` and `FAKEAPI_LOG_HOOK` select the same hooks for a process. Built-in names are `identity`, `stamp` (object), and `prefix` (string). A `path/to/module.js:exportName` value loads a function. Calling `setRecordHook` or `setRedactionHook` replaces the env hook.
 
-Pino has its own [`redact` option](https://github.com/pinojs/pino/blob/main/docs/redaction.md), which removes values by object path before serialization. Use that when the paths are known ahead of time. This server does not. The redaction libraries take a JSON, XML, YAML, or text string and return a string, so the hook is the seam they plug into.
+`app.set('logging', false)` turns the request log off, which is what the unit tests do.
+
+[Pino's `redact` option](https://github.com/pinojs/pino/blob/main/docs/redaction.md) removes values by object path before serialization. Use that in an app that already logs with pino and knows the paths. This server does not use it. The redaction libraries take a JSON, XML, YAML, or text string and return a string, so the string hook is the seam they plug into. The object hook is the seam for a redactor that wants the record before it becomes text.
+
+`npm run conformance` runs the vendored suite in `conformance/` against a live server. Do not edit that directory.
 
 ## Development
 

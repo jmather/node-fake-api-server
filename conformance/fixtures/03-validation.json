@@ -1,0 +1,384 @@
+{
+  "id": "validation",
+  "title": "Shared 400 shape for parse failures and schema rejection, and duplicate 409",
+  "standard": ["Errors", "Shared surface / schema"],
+  "steps": [
+    {
+      "id": "register",
+      "request": {
+        "method": "POST",
+        "path": "/",
+        "headers": {
+          "Content-Type": "application/json",
+          "X-FakeApi-Action": "register"
+        },
+        "body": "{\"external_id\":\"validation\"}"
+      },
+      "expect": {
+        "status": 201,
+        "body": {
+          "match": "json",
+          "value": {
+            "username": {"match": "uuid", "capture": "username"},
+            "password": {"match": "non_empty", "capture": "password"},
+            "auth_token": {
+              "match": "basic_token",
+              "username": "username",
+              "password": "password",
+              "capture": "auth_token"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "empty-body",
+      "request": {
+        "method": "POST",
+        "path": "/",
+        "headers": {"X-FakeApi-Action": "register"},
+        "body": ""
+      },
+      "expect": {
+        "status": 400,
+        "headers": [
+          {"name": "content-type", "match": "exact", "value": "application/json; charset=utf-8"}
+        ],
+        "body": {
+          "match": "json",
+          "value": {
+            "message": "Request payload is malformed.",
+            "errors": [
+              {"keyword": "parse", "path": "", "message": "Request body is empty."}
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "malformed-json",
+      "request": {
+        "method": "POST",
+        "path": "/",
+        "headers": {
+          "Content-Type": "application/json",
+          "X-FakeApi-Action": "register"
+        },
+        "body": "{"
+      },
+      "expect": {
+        "status": 400,
+        "body": {
+          "match": "json",
+          "value": {
+            "message": "Request payload is malformed.",
+            "errors": [
+              {"keyword": "parse", "path": "", "message": "Request body is not valid JSON."}
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "invalid-utf8",
+      "request": {
+        "method": "POST",
+        "path": "/",
+        "headers": {"X-FakeApi-Action": "register"},
+        "body": {"base64": "/w=="}
+      },
+      "expect": {
+        "status": 400,
+        "body": {
+          "match": "json",
+          "value": {
+            "message": "Request payload is malformed.",
+            "errors": [
+              {"keyword": "parse", "path": "", "message": "Request body is not valid UTF-8."}
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "additional-property",
+      "request": {
+        "method": "POST",
+        "path": "/",
+        "headers": {
+          "Content-Type": "application/json",
+          "X-FakeApi-Action": "register"
+        },
+        "body": "{\"broken\":true}"
+      },
+      "expect": {
+        "status": 400,
+        "body": {
+          "match": "json",
+          "value": {
+            "message": "Request payload is invalid.",
+            "errors": [
+              {
+                "keyword": "additionalProperties",
+                "path": "",
+                "message": "must not have additional property 'broken'"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "wrong-type",
+      "request": {
+        "method": "POST",
+        "path": "/",
+        "headers": {
+          "Content-Type": "application/json",
+          "X-FakeApi-Action": "register"
+        },
+        "body": "{\"external_id\":1}"
+      },
+      "expect": {
+        "status": 400,
+        "body": {
+          "match": "json",
+          "value": {
+            "message": "Request payload is invalid.",
+            "errors": [
+              {"keyword": "type", "path": "/external_id", "message": "must be string"}
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "not-an-object",
+      "request": {
+        "method": "POST",
+        "path": "/",
+        "headers": {
+          "Content-Type": "application/json",
+          "X-FakeApi-Action": "register"
+        },
+        "body": "[]"
+      },
+      "expect": {
+        "status": 400,
+        "body": {
+          "match": "json",
+          "value": {
+            "message": "Request payload is invalid.",
+            "errors": [
+              {"keyword": "type", "path": "", "message": "must be object"}
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "bad-path-pattern",
+      "request": {
+        "method": "PUT",
+        "path": "/",
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Basic {{auth_token}}",
+          "X-FakeApi-Action": "record"
+        },
+        "body": "{\"method\":\"get\",\"path\":\"hello\",\"responses\":[{\"status\":200,\"content\":\"x\",\"content_type\":\"text/plain\"}]}"
+      },
+      "expect": {
+        "status": 400,
+        "body": {
+          "match": "json",
+          "value": {
+            "message": "Request payload is invalid.",
+            "errors": [
+              {"keyword": "pattern", "path": "/path", "message": "must match pattern ^/..*"}
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "missing-responses",
+      "request": {
+        "method": "PUT",
+        "path": "/",
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Basic {{auth_token}}",
+          "X-FakeApi-Action": "record"
+        },
+        "body": "{\"method\":\"get\",\"path\":\"/ok\"}"
+      },
+      "expect": {
+        "status": 400,
+        "body": {
+          "match": "json",
+          "value": {
+            "message": "Request payload is invalid.",
+            "errors": [
+              {
+                "keyword": "required",
+                "path": "",
+                "message": "must have required property 'responses'"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "method-enum",
+      "request": {
+        "method": "PUT",
+        "path": "/",
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Basic {{auth_token}}",
+          "X-FakeApi-Action": "record"
+        },
+        "body": "{\"method\":\"GET\",\"path\":\"/ok\",\"responses\":[{\"status\":200,\"content\":\"x\",\"content_type\":\"text/plain\"}]}"
+      },
+      "expect": {
+        "status": 400,
+        "body": {
+          "match": "json",
+          "value": {
+            "message": "Request payload is invalid.",
+            "errors": [
+              {
+                "keyword": "enum",
+                "path": "/method",
+                "message": "must be one of: \"get\", \"post\", \"put\", \"patch\", \"delete\", \"head\", \"options\""
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "min-items",
+      "request": {
+        "method": "PUT",
+        "path": "/",
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Basic {{auth_token}}",
+          "X-FakeApi-Action": "record"
+        },
+        "body": "{\"method\":\"get\",\"path\":\"/ok\",\"responses\":[]}"
+      },
+      "expect": {
+        "status": 400,
+        "body": {
+          "match": "json",
+          "value": {
+            "message": "Request payload is invalid.",
+            "errors": [
+              {
+                "keyword": "minItems",
+                "path": "/responses",
+                "message": "must have at least 1 items"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "status-minimum",
+      "request": {
+        "method": "PUT",
+        "path": "/",
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Basic {{auth_token}}",
+          "X-FakeApi-Action": "record"
+        },
+        "body": "{\"method\":\"get\",\"path\":\"/ok\",\"responses\":[{\"status\":99,\"content\":\"x\",\"content_type\":\"text/plain\"}]}"
+      },
+      "expect": {
+        "status": 400,
+        "body": {
+          "match": "json",
+          "value": {
+            "message": "Request payload is invalid.",
+            "errors": [
+              {
+                "keyword": "minimum",
+                "path": "/responses/0/status",
+                "message": "must be >= 100"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "reserved-header-name",
+      "request": {
+        "method": "PUT",
+        "path": "/",
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Basic {{auth_token}}",
+          "X-FakeApi-Action": "record"
+        },
+        "body": "{\"method\":\"get\",\"path\":\"/ok\",\"headers\":{\"X-FakeApi-Trace\":\"1\"},\"responses\":[{\"status\":200,\"content\":\"x\",\"content_type\":\"text/plain\"}]}"
+      },
+      "expect": {
+        "status": 400,
+        "body": {
+          "match": "json",
+          "value": {
+            "message": "Request payload is invalid.",
+            "errors": [
+              {
+                "keyword": "propertyNames",
+                "path": "/headers/X-FakeApi-Trace",
+                "message": "property name 'X-FakeApi-Trace' is not allowed"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "record-once",
+      "request": {
+        "method": "PUT",
+        "path": "/",
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Basic {{auth_token}}",
+          "X-FakeApi-Action": "record"
+        },
+        "body": "{\"method\":\"get\",\"path\":\"/once\",\"responses\":[{\"status\":200,\"content\":\"one\",\"content_type\":\"text/plain\"}]}"
+      },
+      "expect": {"status": 201}
+    },
+    {
+      "id": "duplicate-is-conflict",
+      "request": {
+        "method": "PUT",
+        "path": "/",
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Basic {{auth_token}}",
+          "X-FakeApi-Action": "record"
+        },
+        "body": "{\"method\":\"get\",\"path\":\"/once\",\"responses\":[{\"status\":200,\"content\":\"different\",\"content_type\":\"text/plain\"}]}"
+      },
+      "expect": {
+        "status": 409,
+        "headers": [
+          {"name": "content-type", "match": "exact", "value": "text/plain; charset=utf-8"}
+        ],
+        "body": {"match": "exact", "value": "Conflict"}
+      }
+    }
+  ]
+}

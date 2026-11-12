@@ -1,0 +1,195 @@
+{
+  "id": "playback",
+  "title": "Incremental wrap, exact content type, response headers, full delay, 5xx log level",
+  "standard": ["Shared surface / delay", "Logging levels"],
+  "steps": [
+    {
+      "id": "register",
+      "request": {
+        "method": "POST",
+        "path": "/",
+        "headers": {
+          "Content-Type": "application/json",
+          "X-FakeApi-Action": "register"
+        },
+        "body": "{\"external_id\":\"playback\"}"
+      },
+      "expect": {
+        "status": 201,
+        "body": {
+          "match": "json",
+          "value": {
+            "username": {"match": "uuid", "capture": "username"},
+            "password": {"match": "non_empty", "capture": "password"},
+            "auth_token": {
+              "match": "basic_token",
+              "username": "username",
+              "password": "password",
+              "capture": "auth_token"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "record-incremental",
+      "request": {
+        "method": "PUT",
+        "path": "/",
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Basic {{auth_token}}",
+          "X-FakeApi-Action": "record"
+        },
+        "body": "{\"method\":\"get\",\"path\":\"/wrap\",\"response_mode\":\"incremental\",\"responses\":[{\"status\":200,\"content\":\"one\",\"content_type\":\"text/plain\"},{\"status\":200,\"content\":\"two\",\"content_type\":\"text/plain\"}]}"
+      },
+      "expect": {"status": 201}
+    },
+    {
+      "id": "wrap-first",
+      "request": {
+        "method": "GET",
+        "path": "/wrap",
+        "headers": {"Authorization": "Basic {{auth_token}}"}
+      },
+      "expect": {"status": 200, "body": {"match": "exact", "value": "one"}}
+    },
+    {
+      "id": "wrap-second",
+      "request": {
+        "method": "GET",
+        "path": "/wrap",
+        "headers": {"Authorization": "Basic {{auth_token}}"}
+      },
+      "expect": {"status": 200, "body": {"match": "exact", "value": "two"}}
+    },
+    {
+      "id": "wrap-back-to-first",
+      "request": {
+        "method": "GET",
+        "path": "/wrap",
+        "headers": {"Authorization": "Basic {{auth_token}}"}
+      },
+      "expect": {"status": 200, "body": {"match": "exact", "value": "one"}}
+    },
+    {
+      "id": "record-headers",
+      "request": {
+        "method": "PUT",
+        "path": "/",
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Basic {{auth_token}}",
+          "X-FakeApi-Action": "record"
+        },
+        "body": "{\"method\":\"get\",\"path\":\"/hdr\",\"responses\":[{\"status\":200,\"content\":\"hdr\",\"content_type\":\"text/plain\",\"headers\":{\"X-Foo\":\"bar\"}}]}"
+      },
+      "expect": {"status": 201}
+    },
+    {
+      "id": "playback-headers",
+      "request": {
+        "method": "GET",
+        "path": "/hdr",
+        "headers": {"Authorization": "Basic {{auth_token}}"}
+      },
+      "expect": {
+        "status": 200,
+        "headers": [
+          {"name": "content-type", "match": "exact", "value": "text/plain"},
+          {"name": "x-foo", "match": "exact", "value": "bar"}
+        ],
+        "body": {"match": "exact", "value": "hdr"}
+      }
+    },
+    {
+      "id": "record-delay",
+      "request": {
+        "method": "PUT",
+        "path": "/",
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Basic {{auth_token}}",
+          "X-FakeApi-Action": "record"
+        },
+        "body": "{\"method\":\"get\",\"path\":\"/slow\",\"responses\":[{\"status\":200,\"content\":\"waited\",\"content_type\":\"text/plain\",\"delay\":300}]}"
+      },
+      "expect": {"status": 201}
+    },
+    {
+      "id": "delay-is-the-full-duration",
+      "request": {
+        "method": "GET",
+        "path": "/slow",
+        "headers": {"Authorization": "Basic {{auth_token}}"}
+      },
+      "expect": {
+        "status": 200,
+        "elapsed_ms_gte": 250,
+        "body": {"match": "exact", "value": "waited"}
+      },
+      "log": {
+        "json": {
+          "value": {
+            "timestamp": {"match": "timestamp"},
+            "level": "info",
+            "msg": "request completed",
+            "server": "{{server}}",
+            "request_id": {"match": "uuid", "equals_header": "x-request-id"},
+            "method": "GET",
+            "path": "/slow",
+            "query": {},
+            "status": 200,
+            "duration_ms": {"match": "number", "minimum": 250},
+            "action": null,
+            "user": "{{username}}"
+          }
+        }
+      }
+    },
+    {
+      "id": "record-500",
+      "request": {
+        "method": "PUT",
+        "path": "/",
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Basic {{auth_token}}",
+          "X-FakeApi-Action": "record"
+        },
+        "body": "{\"method\":\"get\",\"path\":\"/boom\",\"responses\":[{\"status\":500,\"content\":\"boom\",\"content_type\":\"text/plain\"}]}"
+      },
+      "expect": {"status": 201}
+    },
+    {
+      "id": "canned-500-logs-error",
+      "request": {
+        "method": "GET",
+        "path": "/boom",
+        "headers": {"Authorization": "Basic {{auth_token}}"}
+      },
+      "expect": {
+        "status": 500,
+        "body": {"match": "exact", "value": "boom"}
+      },
+      "log": {
+        "json": {
+          "value": {
+            "timestamp": {"match": "timestamp"},
+            "level": "error",
+            "msg": "request completed",
+            "server": "{{server}}",
+            "request_id": {"match": "uuid", "equals_header": "x-request-id"},
+            "method": "GET",
+            "path": "/boom",
+            "query": {},
+            "status": 500,
+            "duration_ms": {"match": "number", "minimum": 0},
+            "action": null,
+            "user": "{{username}}"
+          }
+        }
+      }
+    }
+  ]
+}

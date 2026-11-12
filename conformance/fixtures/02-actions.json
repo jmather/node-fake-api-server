@@ -1,0 +1,140 @@
+{
+  "id": "actions",
+  "title": "Only POST / register and PUT / record are meta actions",
+  "standard": ["Actions"],
+  "steps": [
+    {
+      "id": "register",
+      "request": {
+        "method": "POST",
+        "path": "/",
+        "headers": {
+          "Content-Type": "application/json",
+          "X-FakeApi-Action": "register"
+        },
+        "body": "{\"external_id\":\"actions\"}"
+      },
+      "expect": {
+        "status": 201,
+        "body": {
+          "match": "json",
+          "value": {
+            "username": {"match": "uuid", "capture": "username"},
+            "password": {"match": "non_empty", "capture": "password"},
+            "auth_token": {
+              "match": "basic_token",
+              "username": "username",
+              "password": "password",
+              "capture": "auth_token"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "put-register-is-playback",
+      "request": {
+        "method": "PUT",
+        "path": "/",
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Basic {{auth_token}}",
+          "X-FakeApi-Action": "register"
+        },
+        "body": "{\"external_id\":\"nope\"}"
+      },
+      "expect": {
+        "status": 404,
+        "body": {"match": "exact", "value": "Not Found"}
+      }
+    },
+    {
+      "id": "post-record-is-playback",
+      "request": {
+        "method": "POST",
+        "path": "/",
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Basic {{auth_token}}",
+          "X-FakeApi-Action": "record"
+        },
+        "body": "{\"method\":\"get\",\"path\":\"/should-not-record\",\"responses\":[{\"status\":200,\"content\":\"nope\",\"content_type\":\"text/plain\"}]}"
+      },
+      "expect": {
+        "status": 404,
+        "body": {"match": "exact", "value": "Not Found"}
+      }
+    },
+    {
+      "id": "action-off-root-is-playback",
+      "request": {
+        "method": "POST",
+        "path": "/not-an-endpoint",
+        "headers": {
+          "Authorization": "Basic {{auth_token}}",
+          "X-FakeApi-Action": "register"
+        }
+      },
+      "expect": {
+        "status": 404,
+        "body": {"match": "exact", "value": "Not Found"}
+      }
+    },
+    {
+      "id": "record-action-case",
+      "request": {
+        "method": "PUT",
+        "path": "/",
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Basic {{auth_token}}",
+          "X-FakeApi-Action": "ReCoRd"
+        },
+        "body": "{\"method\":\"get\",\"path\":\"/cased-action\",\"responses\":[{\"status\":200,\"content\":\"cased\",\"content_type\":\"text/plain\"}]}"
+      },
+      "expect": {"status": 201},
+      "log": {
+        "json": {
+          "value": {
+            "timestamp": {"match": "timestamp"},
+            "level": "info",
+            "msg": "request completed",
+            "server": "{{server}}",
+            "request_id": {"match": "uuid", "equals_header": "x-request-id"},
+            "method": "PUT",
+            "path": "/",
+            "query": {},
+            "status": 201,
+            "duration_ms": {"match": "number", "minimum": 0},
+            "action": "ReCoRd",
+            "user": "{{username}}"
+          }
+        }
+      }
+    },
+    {
+      "id": "playback-recorded-despite-case",
+      "request": {
+        "method": "GET",
+        "path": "/cased-action",
+        "headers": {"Authorization": "Basic {{auth_token}}"}
+      },
+      "expect": {
+        "status": 200,
+        "body": {"match": "exact", "value": "cased"}
+      }
+    },
+    {
+      "id": "post-record-did-not-stick",
+      "request": {
+        "method": "GET",
+        "path": "/should-not-record",
+        "headers": {"Authorization": "Basic {{auth_token}}"}
+      },
+      "expect": {
+        "status": 404,
+        "body": {"match": "exact", "value": "Not Found"}
+      }
+    }
+  ]
+}

@@ -40,7 +40,7 @@ describe('Meta Controller', () => {
 
             return client.record(endpoint).catch((error) => {
                 expect(error.statusCode).toBe(400);
-                expect(error.error.message).toContain('data.path should match pattern');
+                expect(error.error.message).toBe('Request payload is invalid.');
             });
         });
 

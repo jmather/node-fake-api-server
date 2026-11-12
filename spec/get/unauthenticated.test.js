@@ -34,7 +34,7 @@ describe('Get Controller', () => {
                 return request(req).catch(error => {
                     expect(error.statusCode).toBe(401);
                     expect(error.error).toBe('Unauthorized');
-                    expect(error.headers['www-authenticate']).toBe('Basic realm=FakeAPI');
+                    expect(error.headers['www-authenticate']).toBe('Basic realm="FakeAPI"');
                 });
             });
         });

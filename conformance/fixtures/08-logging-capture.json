@@ -1,0 +1,160 @@
+{
+  "id": "logging-capture",
+  "title": "Capture all keeps raw bodies and raw query values; bodies truncate at 64 KiB",
+  "standard": ["Logging"],
+  "env": {"FAKEAPI_LOG_CAPTURE": "all"},
+  "xml_log": true,
+  "steps": [
+    {
+      "id": "register",
+      "request": {
+        "method": "POST",
+        "path": "/",
+        "headers": {
+          "Content-Type": "application/json",
+          "X-FakeApi-Action": "register"
+        },
+        "body": "{\"external_id\":\"logs\"}"
+      },
+      "expect": {
+        "status": 201,
+        "body": {
+          "match": "json",
+          "value": {
+            "username": {"match": "uuid", "capture": "username"},
+            "password": {"match": "uuid", "capture": "password"},
+            "auth_token": {
+              "match": "basic_token",
+              "username": "username",
+              "password": "password",
+              "capture": "auth_token"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "record",
+      "request": {
+        "method": "PUT",
+        "path": "/",
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Basic {{auth_token}}",
+          "X-FakeApi-Action": "record"
+        },
+        "body": "{\"method\":\"post\",\"path\":\"/raw\",\"responses\":[{\"status\":200,\"content\":\"pong\",\"content_type\":\"text/plain\"}]}"
+      },
+      "expect": {"status": 201}
+    },
+    {
+      "id": "raw-body-and-query",
+      "request": {
+        "method": "POST",
+        "path": "/raw",
+        "query_raw": "a=1&a=2&pwd=p%40ss",
+        "headers": {
+          "Authorization": "Basic {{auth_token}}",
+          "Content-Type": "text/plain",
+          "X-Trace": "abc"
+        },
+        "body": "a < b & c\nline"
+      },
+      "expect": {"status": 200, "body": {"match": "exact", "value": "pong"}},
+      "log": {
+        "raw_excludes": ["{{password}}"],
+        "json": {
+          "value": {
+            "timestamp": {"match": "timestamp"},
+            "level": "info",
+            "msg": "request completed",
+            "server": "{{server}}",
+            "request_id": {"match": "uuid", "equals_header": "x-request-id"},
+            "method": "POST",
+            "path": "/raw",
+            "query": {"a": ["1", "2"], "pwd": "p%40ss"},
+            "status": 200,
+            "duration_ms": {"match": "number", "minimum": 0},
+            "action": null,
+            "user": "{{username}}",
+            "request": {
+              "match": "object",
+              "keys": {
+                "content_type": "text/plain",
+                "body": "a < b & c\nline",
+                "headers": {
+                  "match": "object",
+                  "keys": {"x-trace": "abc", "content-type": "text/plain"}
+                }
+              }
+            },
+            "response": {
+              "match": "object",
+              "keys": {
+                "content_type": "text/plain",
+                "body": "pong"
+              }
+            }
+          }
+        },
+        "xml": {
+          "text": {
+            "method": "POST",
+            "path": "/raw",
+            "status": "200",
+            "user": "{{username}}",
+            "server": "{{server}}",
+            "query/param@name=a#0": "1",
+            "query/param@name=a#1": "2",
+            "query/param@name=pwd": "p%40ss",
+            "request/body": "a < b & c\nline",
+            "request/content_type": "text/plain",
+            "response/body": "pong"
+          }
+        }
+      }
+    },
+    {
+      "id": "record-big",
+      "request": {
+        "method": "PUT",
+        "path": "/",
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Basic {{auth_token}}",
+          "X-FakeApi-Action": "record"
+        },
+        "body": "{\"method\":\"post\",\"path\":\"/big\",\"responses\":[{\"status\":200,\"content\":\"ok\",\"content_type\":\"text/plain\"}]}"
+      },
+      "expect": {"status": 201}
+    },
+    {
+      "id": "body-truncated-at-64kib",
+      "request": {
+        "method": "POST",
+        "path": "/big",
+        "headers": {
+          "Authorization": "Basic {{auth_token}}",
+          "Content-Type": "text/plain"
+        },
+        "body": {"repeat": "a", "count": 65636}
+      },
+      "expect": {"status": 200},
+      "log": {
+        "json": {
+          "value": {
+            "match": "object",
+            "keys": {
+              "request": {
+                "match": "object",
+                "keys": {
+                  "body": {"match": "regex", "pattern": "^a{60000,}…\\[truncated\\]$"}
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

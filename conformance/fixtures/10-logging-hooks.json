@@ -1,0 +1,45 @@
+{
+  "id": "logging-hooks",
+  "title": "Object hook runs before serialization; string hook sees that text",
+  "standard": ["Logging / hooks"],
+  "xml_log": true,
+  "hooks": {"string": "prefix", "object": "stamp"},
+  "steps": [
+    {
+      "id": "register",
+      "request": {
+        "method": "POST",
+        "path": "/",
+        "headers": {
+          "Content-Type": "application/json",
+          "X-FakeApi-Action": "register"
+        },
+        "body": "{\"external_id\":\"hooks\"}"
+      },
+      "expect": {"status": 201},
+      "log": {
+        "raw_prefix": "[json]",
+        "json": {
+          "value": {
+            "match": "object",
+            "keys": {
+              "msg": "request completed [stamped]",
+              "server": "{{server}}",
+              "path": "/",
+              "status": 201,
+              "method": "POST"
+            }
+          }
+        },
+        "xml": {
+          "text": {
+            "msg": "request completed [stamped]",
+            "server": "{{server}}",
+            "path": "/",
+            "status": "201"
+          }
+        }
+      }
+    }
+  ]
+}

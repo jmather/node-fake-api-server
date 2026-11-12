@@ -1,0 +1,148 @@
+{
+  "id": "schema-and-cors",
+  "title": "Schema documents are public and byte-exact; CORS reflects Origin",
+  "standard": ["Shared surface / schema files", "Shared surface / CORS"],
+  "steps": [
+    {
+      "id": "schema-json",
+      "request": {"method": "GET", "path": "/fake-api-schema.json"},
+      "expect": {
+        "status": 200,
+        "headers": [
+          {"name": "content-type", "match": "exact", "value": "application/json; charset=utf-8"},
+          {"name": "x-request-id", "match": "uuid"},
+          {"name": "www-authenticate", "match": "absent"}
+        ],
+        "body": {"match": "file", "path": "assets/fake-api-schema.json"}
+      }
+    },
+    {
+      "id": "openapi-yaml",
+      "request": {"method": "GET", "path": "/fake-api.openapi.yaml"},
+      "expect": {
+        "status": 200,
+        "headers": [
+          {"name": "content-type", "match": "exact", "value": "application/yaml"}
+        ],
+        "body": {"match": "file", "path": "assets/fake-api.openapi.yaml"}
+      }
+    },
+    {
+      "id": "error-reflects-origin",
+      "request": {
+        "method": "GET",
+        "path": "/nope",
+        "headers": {"Origin": "https://app.example"}
+      },
+      "expect": {
+        "status": 401,
+        "headers": [
+          {"name": "access-control-allow-origin", "match": "exact", "value": "https://app.example"},
+          {"name": "access-control-allow-credentials", "match": "exact", "value": "true"},
+          {"name": "vary", "match": "exact", "value": "Origin"},
+          {"name": "www-authenticate", "match": "exact", "value": "Basic realm=\"FakeAPI\""}
+        ],
+        "body": {"match": "exact", "value": "Unauthorized"}
+      }
+    },
+    {
+      "id": "preflight",
+      "request": {
+        "method": "OPTIONS",
+        "path": "/nope",
+        "headers": {
+          "Origin": "https://app.example",
+          "Access-Control-Request-Method": "PUT",
+          "Access-Control-Request-Headers": "X-Trace, X-Other"
+        }
+      },
+      "expect": {
+        "status": 204,
+        "headers": [
+          {"name": "access-control-allow-origin", "match": "exact", "value": "https://app.example"},
+          {"name": "access-control-allow-credentials", "match": "exact", "value": "true"},
+          {"name": "access-control-allow-methods", "match": "exact", "value": "PUT"},
+          {"name": "access-control-allow-headers", "match": "exact", "value": "X-Trace, X-Other"},
+          {"name": "vary", "match": "exact", "value": "Origin"},
+          {"name": "content-type", "match": "absent"},
+          {"name": "www-authenticate", "match": "absent"},
+          {"name": "access-control-max-age", "match": "absent"}
+        ],
+        "body": {"match": "empty"}
+      }
+    },
+    {
+      "id": "options-without-preflight-is-playback",
+      "request": {"method": "OPTIONS", "path": "/hello"},
+      "expect": {
+        "status": 401,
+        "headers": [
+          {"name": "access-control-allow-origin", "match": "absent"}
+        ],
+        "body": {"match": "exact", "value": "Unauthorized"}
+      }
+    },
+    {
+      "id": "register",
+      "request": {
+        "method": "POST",
+        "path": "/",
+        "headers": {
+          "Content-Type": "application/json",
+          "X-FakeApi-Action": "register"
+        },
+        "body": "{\"external_id\":\"cors\"}"
+      },
+      "expect": {
+        "status": 201,
+        "body": {
+          "match": "json",
+          "value": {
+            "username": {"match": "uuid", "capture": "username"},
+            "password": {"match": "non_empty", "capture": "password"},
+            "auth_token": {
+              "match": "basic_token",
+              "username": "username",
+              "password": "password",
+              "capture": "auth_token"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "record",
+      "request": {
+        "method": "PUT",
+        "path": "/",
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Basic {{auth_token}}",
+          "X-FakeApi-Action": "record"
+        },
+        "body": "{\"method\":\"get\",\"path\":\"/cors\",\"responses\":[{\"status\":200,\"content\":\"ok\",\"content_type\":\"text/plain\"}]}"
+      },
+      "expect": {"status": 201}
+    },
+    {
+      "id": "playback-keeps-cors-headers",
+      "request": {
+        "method": "GET",
+        "path": "/cors",
+        "headers": {
+          "Authorization": "Basic {{auth_token}}",
+          "Origin": "https://app.example"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "headers": [
+          {"name": "access-control-allow-origin", "match": "exact", "value": "https://app.example"},
+          {"name": "access-control-allow-credentials", "match": "exact", "value": "true"},
+          {"name": "vary", "match": "exact", "value": "Origin"}
+        ],
+        "body": {"match": "exact", "value": "ok"}
+      }
+    }
+  ]
+}
