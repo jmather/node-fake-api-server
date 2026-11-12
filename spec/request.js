@@ -70,6 +70,7 @@ function request(options) {
             const error = new Error('Status code ' + response.status);
             error.statusCode = response.status;
             error.error = parsed;
+            error.headers = headersObj;
             throw error;
         }
 

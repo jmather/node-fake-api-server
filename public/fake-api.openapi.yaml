@@ -132,6 +132,9 @@ components:
           type: string
           format: uri-reference
           pattern: "^/..*"
+        body:
+          type: string
+          description: Optional raw request body. When set, the request body must match this string exactly.
         headers:
           type: object
         query_parameters:

@@ -1,3 +1,4 @@
+const request = require('../request');
 const TestHelper = require('../helper');
 const helper = new TestHelper();
 
@@ -40,6 +41,38 @@ describe('Meta Controller', () => {
             return client.record(endpoint).catch((error) => {
                 expect(error.statusCode).toBe(400);
                 expect(error.error.message).toContain('data.path should match pattern');
+            });
+        });
+
+        it('accepts a mixed-case record action and an optional body', () => {
+            expect.assertions(2);
+
+            const endpoint = {
+                method: 'post',
+                path: '/with-body',
+                body: '{"n":1}',
+                responses: [
+                    {
+                        status: 200,
+                        content: 'body match',
+                        content_type: 'text/plain',
+                    },
+                ],
+            };
+
+            return request({
+                method: 'put',
+                uri: client.server,
+                headers: {
+                    'X-FakeAPI-Action': 'RECORD',
+                },
+                body: endpoint,
+                json: true,
+                auth: client.auth,
+                resolveWithFullResponse: true,
+            }).then((response) => {
+                expect(response.statusCode).toBe(201);
+                expect(response.body.body).toBe('{"n":1}');
             });
         });
 

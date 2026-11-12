@@ -32,6 +32,26 @@ describe('Meta Controller', () => {
             });
         });
 
+        it('accepts the action header in any case', () => {
+            expect.assertions(2);
+
+            return request({
+                method: 'post',
+                uri: client.server,
+                headers: {
+                    'X-FakeAPI-Action': 'ReGiStEr',
+                },
+                body: {
+                    external_id: 'case',
+                },
+                json: true,
+                resolveWithFullResponse: true,
+            }).then((response) => {
+                expect(response.statusCode).toBe(201);
+                expect(response.body.username).not.toEqual(null);
+            });
+        });
+
         it('rejects a bad request', () => {
             expect.assertions(2);
 

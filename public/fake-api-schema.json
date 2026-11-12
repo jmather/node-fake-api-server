@@ -35,6 +35,10 @@
           "format": "uri-reference",
           "pattern": "^/..*"
         },
+        "body": {
+          "type": "string",
+          "description": "Optional raw request body. When set, the request body must match this string exactly."
+        },
         "headers": {
           "$ref": "#/definitions/RequestHeaders"
         },

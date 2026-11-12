@@ -22,7 +22,7 @@ describe('Get Controller', () => {
         });
 
         it('errors when it can match multiple endpoints', () => {
-            expect.assertions(2);
+            expect.assertions(3);
             return client.record(helper.endpoints.hello_foo).then(() => {
                 const req = {
                     url: client.server + '/hello-world',
@@ -34,6 +34,7 @@ describe('Get Controller', () => {
                 return request(req).catch(error => {
                     expect(error.statusCode).toBe(401);
                     expect(error.error).toBe('Unauthorized');
+                    expect(error.headers['www-authenticate']).toBe('Basic realm=FakeAPI');
                 });
             });
         });
