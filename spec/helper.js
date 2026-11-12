@@ -3,6 +3,17 @@ const request = require('./request');
 
 const app = require('../lib/app');
 
+// Fetch refuses these ports ("bad port"). The old picker used 3000-4999, which
+// includes 3659 and 4045, so a test would fail whenever it landed on one.
+const FETCH_BLOCKED_PORTS = new Set([
+    '1', '7', '9', '11', '13', '15', '17', '19', '20', '21', '22', '23', '25', '37', '42', '43', '53', '69', '77', '79',
+    '87', '95', '101', '102', '103', '104', '109', '110', '111', '113', '115', '117', '119', '123', '135', '137',
+    '139', '143', '161', '179', '389', '427', '465', '512', '513', '514', '515', '526', '530', '531', '532',
+    '540', '548', '554', '556', '563', '587', '601', '636', '989', '990', '993', '995', '1719', '1720', '1723',
+    '2049', '3659', '4045', '4190', '5060', '5061', '6000', '6566', '6665', '6666', '6667', '6668', '6669', '6679',
+    '6697', '10080',
+]);
+
 /**
  * HTTP calls match jmather/node-fake-api-client: POST register, PUT record,
  * HTTP Basic on later calls. Kept in-repo so tests do not depend on the
@@ -75,7 +86,23 @@ class TestHelper {
      */
     buildServer(preferredPort) {
         return new Promise((accept, reject) => {
-            const port = preferredPort || Math.floor(Math.random() * 2000) + 3000;
+            let settled = false;
+            const finish = (error, client) => {
+                if (settled) {
+                    return;
+                }
+
+                settled = true;
+
+                if (error) {
+                    reject(error);
+                    return;
+                }
+
+                accept(client);
+            };
+
+            const port = preferredPort == null || preferredPort === '' ? 0 : preferredPort;
 
             app.set('port', port);
             app.set('logging', false);
@@ -83,18 +110,31 @@ class TestHelper {
             this.server = http.createServer(app);
 
             this.server.on('listening', () => {
-                accept(new TestClient('http://127.0.0.1:' + port));
+                const assigned = this.server.address().port;
+
+                if (FETCH_BLOCKED_PORTS.has(String(assigned))) {
+                    this.server.close(() => {
+                        this.buildServer().then(
+                            (client) => finish(null, client),
+                            (error) => finish(error)
+                        );
+                    });
+                    return;
+                }
+
+                finish(null, new TestClient('http://127.0.0.1:' + assigned));
             });
 
             this.server.on('error', (error) => {
-                switch (error.code) {
-                    case 'EADDRINUSE':
-                    case 'EACCES':
-                        return this.buildServer().then(accept);
-
-                    default:
-                        reject(error);
+                if (error.code === 'EADDRINUSE' || error.code === 'EACCES') {
+                    this.buildServer().then(
+                        (client) => finish(null, client),
+                        (err) => finish(err)
+                    );
+                    return;
                 }
+
+                finish(error);
             });
 
             this.startListening(port);
@@ -102,7 +142,7 @@ class TestHelper {
     }
 
     startListening(port) {
-        this.server.listen(port);
+        this.server.listen(port, '127.0.0.1');
     }
 
     /**
