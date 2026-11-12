@@ -1,3 +1,5 @@
+const crypto = require('crypto');
+const { mock } = require('node:test');
 const User = require('../../lib/classes/User');
 const UserManager = require('../../lib/classes/UserManager');
 
@@ -33,24 +35,20 @@ describe('UserManager', () => {
         const username = 'new';
         const password = 'pass';
 
-        const mockV4 = jest.fn();
-        mockV4
-            .mockReturnValueOnce(str)
-            .mockReturnValueOnce(str)
-            .mockReturnValueOnce(username)
-            .mockReturnValueOnce(password);
-
-        const uuid = require('uuid');
-        const oldV4 = uuid.v4;
-        uuid.v4 = mockV4;
+        const values = [str, str, username, password];
+        const mocked = mock.method(crypto, 'randomUUID');
+        mocked.mock.mockImplementation(() => values.shift());
 
         userManager.users[str] = true;
 
-        const user = userManager.create('test');
-        uuid.v4 = oldV4;
+        try {
+            const user = userManager.create('test');
 
-        expect(user.username).toBe(username);
-        expect(user.password).toBe(password);
-        expect(mockV4.mock.calls).toHaveLength(4);
+            expect(user.username).toBe(username);
+            expect(user.password).toBe(password);
+            expect(mocked.mock.calls.length).toBe(4);
+        } finally {
+            mocked.mock.restore();
+        }
     });
 });

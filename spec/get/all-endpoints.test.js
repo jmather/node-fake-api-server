@@ -1,8 +1,6 @@
-const Promise = require('bluebird');
-require('any-promise/register/bluebird');
-const request = require('request-promise-any');
+const request = require('../request');
 
-const TestHelper = require('../test-helper');
+const TestHelper = require('../helper');
 const helper = new TestHelper();
 
 /**
@@ -24,7 +22,7 @@ describe('Get Controller', () => {
         });
 
         for (const endpointName in helper.endpoints) {
-            if (helper.endpoints.hasOwnProperty(endpointName) === false) {
+            if (Object.hasOwn(helper.endpoints, endpointName) === false) {
                 continue;
             }
 
@@ -76,7 +74,7 @@ function getAssertionCount(endpoint) {
 function testIncrementalEndpoint(client, endpoint) {
     const req = getRequestTemplate(client, endpoint);
 
-    return Promise.each(endpoint.responses, (response) => {
+    return request.each(endpoint.responses, (response) => {
         const startedRequestAt = Date.now();
         return request(req).then(resp => {
             const runTime = (Date.now() - startedRequestAt) / 1000;
@@ -98,7 +96,7 @@ function testRandomEndpoint(client, endpoint) {
 
     let matchingResponses = 0;
 
-    return Promise.each(endpoint.responses, (response) => {
+    return request.each(endpoint.responses, (response) => {
         return request(req).then(resp => {
             if (doesResponseMatch(response, resp)) {
                 matchingResponses++;
