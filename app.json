@@ -13,11 +13,11 @@
   "formation": {
     "web": {
       "quantity": 1,
-      "size": "free"
+      "size": "basic"
     }
   },
   "name": "node-fake-api-server",
   "scripts": {
   },
-  "stack": "heroku-18"
+  "stack": "heroku-24"
 }

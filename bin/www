@@ -7,7 +7,6 @@
 const app = require('../lib/app');
 const debug = require('debug')('fake-api-server:server');
 const http = require('http');
-const ngrok = require('ngrok');
 
 /**
  * Get port from environment and store in Express.
@@ -88,11 +87,20 @@ async function onListening() {
     ? 'pipe ' + addr
     : 'port ' + addr.port;
 
+  debug('Listening on ' + bind);
   console.log('Listening at http://127.0.0.1:' + addr.port);
 
-  if (process.argv.indexOf('--public') > -1) {
-    console.log('Establishing public url...');
-    const url = await ngrok.connect({port: addr.port});
-    console.log('Listening publicly at ' + url);
+  if (process.argv.indexOf('--public') === -1) {
+    return;
   }
+
+  if (!process.env.NGROK_AUTHTOKEN) {
+    console.error('The --public flag needs NGROK_AUTHTOKEN. Create one at https://dashboard.ngrok.com/get-started/your-authtoken');
+    process.exit(1);
+  }
+
+  console.log('Establishing public url...');
+  const ngrok = require('@ngrok/ngrok');
+  const listener = await ngrok.forward({ addr: addr.port, authtoken_from_env: true });
+  console.log('Listening publicly at ' + listener.url());
 }

@@ -1,13 +1,12 @@
-const url = require('url');
-const TestHelper = require('./test-helper');
+const TestHelper = require('./helper');
 const helper = new TestHelper();
 
 describe('TestHelper', () => {
     it('rebinds when you try to connect to port 80', () => {
         expect.assertions(1);
         return helper.buildServer(443).then((client) => {
-            const uri = url.parse(client.server);
-            expect(uri.port).not.toBe(443);
+            const uri = new URL(client.server);
+            expect(uri.port).not.toBe('443');
             helper.stopServer();
         });
     });
@@ -16,9 +15,9 @@ describe('TestHelper', () => {
         expect.assertions(1);
         return helper.buildServer().then((client1) => {
             const server1 = helper.server;
-            const uri = url.parse(client1.server);
+            const uri = new URL(client1.server);
             return helper.buildServer(uri.port).then((client2) => {
-                const otherUri = url.parse(client2.server);
+                const otherUri = new URL(client2.server);
 
                 expect(otherUri.port).not.toBe(uri.port);
                 server1.close();

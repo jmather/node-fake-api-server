@@ -1,7 +1,6 @@
-require('any-promise/register/bluebird');
-const request = require('request-promise-any');
+const request = require('../request');
 
-const TestHelper = require('../test-helper');
+const TestHelper = require('../helper');
 const helper = new TestHelper();
 
 describe('Get Controller', () => {

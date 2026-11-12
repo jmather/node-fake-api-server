@@ -1,4 +1,4 @@
-const TestHelper = require('../test-helper');
+const TestHelper = require('../helper');
 const helper = new TestHelper();
 
 describe('Meta Controller', () => {

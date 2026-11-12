@@ -1,40 +1,46 @@
 # Fake API Server
 
-[![Build Status](https://travis-ci.org/jmather/node-fake-api-server.svg?branch=master)](https://travis-ci.org/jmather/node-fake-api-server)
-[![Sonarcloud Status](https://sonarcloud.io/api/project_badges/measure?project=jmather_node-fake-api-server&metric=alert_status)](https://sonarcloud.io/dashboard?id=jmather_node-fake-api-server)
-[![Coverage Status](https://coveralls.io/repos/github/jmather/node-fake-api-server/badge.svg?branch=master)](https://coveralls.io/github/jmather/node-fake-api-server?branch=master)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/2f323f9700ab4e2eaed48f6e79355d70)](https://app.codacy.com/app/jmather/node-fake-api-server?utm_source=github.com&utm_medium=referral&utm_content=jmather/node-fake-api-server&utm_campaign=Badge_Grade_Dashboard)
-[![DeepScan grade](https://deepscan.io/api/teams/2509/projects/5227/branches/40566/badge/grade.svg)](https://deepscan.io/dashboard#view=project&tid=2509&pid=5227&bid=40566)
+[![CI](https://github.com/jmather/node-fake-api-server/actions/workflows/ci.yml/badge.svg)](https://github.com/jmather/node-fake-api-server/actions/workflows/ci.yml)
 
-This tool allows you to register collections of arbitrary endpoints to mock responses for, allowing you to easily test your code end-to-end.
+Register collections of arbitrary endpoints and mock their responses, so you can test your code end to end.
 
-Pair with the [Fake API Client](https://github.com/jmather/node-fake-api-client) for easy collection registration.
+Pair it with the [Fake API Client](https://github.com/jmather/node-fake-api-client). This server still speaks that client's HTTP contract:
 
-View the [API Documentation](https://documenter.getpostman.com/view/4858910/S1LpZrgg#intro) to get a better idea of how to use the Fake API.
+- `POST /` with header `X-FakeAPI-Action: register` and a JSON body `{ "external_id": "..." }`
+- `PUT /` with header `X-FakeAPI-Action: record`, HTTP Basic auth, and an endpoint JSON body
+- any other method or path is matched against the recorded endpoints for that user
 
-A server instance has been set up at [https://node-fake-api-server.herokuapp.com/](https://node-fake-api-server.herokuapp.com/).
+## Requirements
+
+Node.js 26 or newer. Node.js 26 ("Lithium") is the Active LTS line as of November 2026. `.nvmrc` pins that major.
 
 ## Schema
 
-We have defined an [Open API Specification](/public/fake-api.openapi.yaml) as well as a detailed [JSON Schema](/public/fake-api-schema.json) of the request payloads.
+Request payloads are described by an [OpenAPI document](public/fake-api.openapi.yaml) and a [JSON Schema](public/fake-api-schema.json). A running server also serves those files at `/fake-api.openapi.yaml` and `/fake-api-schema.json`.
 
 ## Usage
 
-### Run Locally (Private)
+### Run locally
 
 ```bash
 npm install -g node-fake-api-server
 fake-api-server
 ```
 
-### Run Locally (Public)
+The process listens on `PORT`, or port 3000 when `PORT` is unset.
+
+### Public URL
 
 ```bash
-npm install -g node-fake-api-server
+export NGROK_AUTHTOKEN=your-token
 fake-api-server --public
 ```
 
-### Run In Code
+`--public` opens a tunnel with the official `@ngrok/ngrok` SDK. Create a token at <https://dashboard.ngrok.com/get-started/your-authtoken>. The server stays on localhost when the flag is omitted, and it does not contact ngrok in that case.
+
+### Run in code
+
+The package is CommonJS. `require('node-fake-api-server')` is the Express app.
 
 ```javascript
 const http = require('http');
@@ -46,8 +52,32 @@ app.set('port', port);
 
 const server = http.createServer(app);
 server.listen(port);
+```
 
-server.on('listening', () => {
-    // do stuff...
-});
+### Example
+
+```bash
+curl -s -X POST http://127.0.0.1:3000/ \
+  -H 'Content-Type: application/json' \
+  -H 'X-FakeAPI-Action: register' \
+  -d '{"external_id":"demo"}'
+
+curl -s -X PUT http://127.0.0.1:3000/ \
+  -u 'USERNAME:PASSWORD' \
+  -H 'Content-Type: application/json' \
+  -H 'X-FakeAPI-Action: record' \
+  -d '{"method":"get","path":"/hello","responses":[{"status":200,"content":"Hello World!","content_type":"text/plain"}]}'
+
+curl -s -u 'USERNAME:PASSWORD' http://127.0.0.1:3000/hello
+```
+
+Use the `username` and `password` from the register response in the later commands.
+
+## Development
+
+```bash
+nvm use
+npm ci
+npm test
+npm run lint
 ```
